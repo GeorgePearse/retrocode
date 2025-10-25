@@ -1,6 +1,6 @@
 # Assertion Types Reference
 
-Complete reference for all 7 assertion types supported by AI Backtest.
+Complete reference for all 10 assertion types supported by retrocode.
 
 ## Overview
 
@@ -15,6 +15,9 @@ Assertions validate different aspects of agent responses:
 | `code_analysis` | Static code analysis | Type hints, docstrings, code quality |
 | `llm_judge` | Subjective evaluation | Behavioral rules, clarity, helpfulness |
 | `snapshot` | Output comparison | Regression detection, stability |
+| `pr_match` | PR comparison | Match against GitHub PR changes |
+| `code_contains` | Required code patterns | Ensure specific code is present |
+| `code_excludes` | Forbidden code patterns | Prevent dangerous/unwanted code |
 
 ## 1. must_contain
 
@@ -408,9 +411,192 @@ assertions:
 - **Output stability**: Ensure consistent outputs
 - **Reviewing changes**: Easy diff when updating instructions
 
+## 8. pr_match
+
+Compare generated code against a GitHub PR's changes.
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: pr_match
+    description: "Should match PR #456 implementation"
+    metadata:
+      pr_reference: "GeorgePearse/retrocode#456"
+      match_level: "semantic"
+      threshold: 0.75
+    severity: error
+```
+
+### With Focus Files
+
+Only compare specific files from the PR:
+
+```yaml
+assertions:
+  - type: pr_match
+    metadata:
+      pr_reference: "owner/repo#123"
+      match_level: "semantic"
+      threshold: 0.75
+      focus_files:
+        - "src/auth.py"
+        - "src/middleware.py"
+    description: "Generated code should match PR #123 for auth modules"
+```
+
+### Match Levels
+
+- **`exact`** - Character-for-character match (after whitespace normalization)
+- **`semantic`** - AST-based comparison (same structure, different formatting)
+- **`functional`** - LLM judge evaluates if code achieves same goal (expensive)
+
+### Use Cases
+
+- Validate against known-good implementations
+- Ensure consistency with approved patterns
+- Regression testing for instruction changes
+
+## 9. code_contains
+
+Ensure required code patterns are present.
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: code_contains
+    target: generated_code
+    description: "Must implement authentication function"
+    metadata:
+      snippet: "def authenticate(user, password):"
+      match_type: "exact"
+      language: "python"
+    severity: error
+```
+
+### Semantic Matching
+
+Use AST-based comparison to allow different formatting:
+
+```yaml
+assertions:
+  - type: code_contains
+    target: generated_code
+    metadata:
+      snippet: |
+        def verify_token(token: str) -> Optional[User]:
+            payload = jwt.decode(token, SECRET_KEY)
+            return User.get(payload['user_id'])
+      match_type: "semantic"
+      language: "python"
+    description: "Must include JWT token verification"
+```
+
+### Regex Matching
+
+Use regex for flexible pattern matching:
+
+```yaml
+assertions:
+  - type: code_contains
+    target: generated_code
+    metadata:
+      snippet: r"@app\.route\('/api/\w+'\)"
+      match_type: "regex"
+      language: "python"
+    description: "Should define at least one API route"
+```
+
+### Match Types
+
+- **`exact`** - Substring match (case-sensitive, whitespace-normalized)
+- **`semantic`** - AST-based comparison for Python
+- **`regex`** - Full regex pattern matching
+
+## 10. code_excludes
+
+Prevent dangerous or unwanted code patterns.
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: code_excludes
+    target: generated_code
+    description: "Must not use dangerous functions"
+    metadata:
+      patterns:
+        - r"eval\("
+        - r"exec\("
+        - r"__import__\("
+      match_type: "regex"
+    severity: error
+```
+
+### Security Best Practices
+
+```yaml
+assertions:
+  - type: code_excludes
+    target: generated_code
+    metadata:
+      patterns:
+        - "eval("
+        - "exec("
+        - "os.system("
+        - "subprocess.call"
+        - "pickle.loads"
+      match_type: "regex"
+    description: "Must not use functions that execute arbitrary code"
+
+  - type: code_excludes
+    target: generated_code
+    metadata:
+      patterns:
+        - "sys.path.append"
+        - "sys.path.insert"
+        - "__import__"
+      match_type: "exact"
+    description: "Must not modify Python internals"
+```
+
+### Architectural Patterns
+
+```yaml
+assertions:
+  - type: code_excludes
+    target: generated_code
+    metadata:
+      patterns:
+        - r"from \w+ import \*"  # Wildcard imports
+        - r"global \w+"          # Global variables
+        - "# TODO"               # Unfinished code
+      match_type: "regex"
+    description: "Must follow code style guidelines"
+```
+
+### Multiple Patterns
+
+Specify multiple patterns to check:
+
+```yaml
+assertions:
+  - type: code_excludes
+    target: generated_code
+    metadata:
+      patterns:
+        - r"except\s*:"      # Bare except
+        - r"\.strip\(\)"     # Unsafe string operations
+        - "FIXME"            # Unresolved issues
+      match_type: "regex"
+    severity: warning  # Non-blocking
+    description: "Code quality checks"
+```
+
 ## Assertion Targets
 
-Available for: `must_contain`, `must_not_contain`, `regex_match`, `code_analysis`
+Available for: `must_contain`, `must_not_contain`, `regex_match`, `code_analysis`, `code_contains`, `code_excludes`
 
 | Target | Contains |
 |--------|----------|

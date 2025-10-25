@@ -5,21 +5,30 @@ from typing import Optional
 
 from tqdm import tqdm
 
-from retrocode.agent import AgentInvoker
 from retrocode.assertions import AssertionRegistry
+from retrocode.executors import ExecutorBackend, LocalExecutor
 from retrocode.models import AgentResponse, AssertionSeverity, TestCase, TestResult, TestSuite
 
 
 class TestRunner:
     """Runs test suites and collects results."""
 
-    def __init__(self, api_key: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        executor: Optional[ExecutorBackend] = None,
+    ) -> None:
         """Initialize the test runner.
 
         Args:
             api_key: Anthropic API key. If None, uses ANTHROPIC_API_KEY env var.
+                     Only used if executor is not provided.
+            executor: ExecutorBackend to use for test execution. If None, creates LocalExecutor.
         """
-        self.agent = AgentInvoker(api_key=api_key)
+        if executor is None:
+            executor = LocalExecutor(api_key=api_key)
+        self.executor = executor
+        self.executor.setup()
 
     def run_suite(self, test_suite: TestSuite) -> list[TestResult]:
         """Run all tests in a suite.
@@ -48,18 +57,24 @@ class TestRunner:
         """
         start_time = time.time()
 
-        # Invoke agent
+        # Execute test using the configured executor
         try:
-            agent_response = self.agent.invoke(
-                task=test_case.task,
-                instruction_file_path=test_suite.metadata.get(
-                    "instruction_file",
-                    "/home/georgepearse/CLAUDE.md"
-                ),
-                model=test_suite.model_under_test,
-            )
+            execution_context = self.executor.execute_test(test_case, test_suite)
+            agent_response = execution_context.agent_response
+
+            # Handle execution errors
+            if execution_context.error_message:
+                agent_response = AgentResponse(
+                    task=test_case.task,
+                    full_response=execution_context.error_message,
+                    model=test_suite.model_under_test,
+                    instruction_file_path=test_suite.metadata.get(
+                        "instruction_file",
+                        "unknown"
+                    ),
+                )
         except Exception as e:
-            # Return failed result if agent invocation fails
+            # Return failed result if execution fails
             return TestResult(
                 test_case=test_case,
                 agent_response=AgentResponse(
@@ -118,3 +133,11 @@ class TestRunner:
         for suite in test_suites:
             all_results[suite.name] = self.run_suite(suite)
         return all_results
+
+    def __del__(self) -> None:
+        """Clean up executor resources on deletion."""
+        try:
+            self.executor.teardown()
+        except Exception:
+            # Silently ignore cleanup errors during finalization
+            pass

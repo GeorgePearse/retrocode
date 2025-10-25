@@ -64,7 +64,7 @@ uvx ty check src/ tests/
 - Integrates seamlessly with Ruff (same team)
 - Uses uvx for convenient invocation
 
-**Note:** Ty is disabled in pre-commit hooks until type annotations are cleaned up. Enable it locally with the commands above.
+**Note:** Ty is enabled in pre-commit hooks. Run it locally to check before committing.
 
 ### Linting & Formatting: Ruff
 

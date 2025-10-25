@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from sqlalchemy import create_engine
@@ -37,7 +37,7 @@ class CacheEntry(Base):
         self.judge_model = judge_model
         self.response_hash = response_hash
         self.result = result
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
         if ttl_hours:
             self.expires_at = self.created_at + timedelta(hours=ttl_hours)
 
@@ -113,7 +113,7 @@ class JudgeCache:
                 return None
 
             # Check if expired
-            if entry.expires_at and entry.expires_at < datetime.utcnow():
+            if entry.expires_at and entry.expires_at < datetime.now(timezone.utc):
                 session.delete(entry)
                 session.commit()
                 return None
@@ -175,7 +175,7 @@ class JudgeCache:
                 .filter(
                     and_(
                         CacheEntry.expires_at is not None,
-                        CacheEntry.expires_at < datetime.utcnow(),
+                        CacheEntry.expires_at < datetime.now(timezone.utc),
                     )
                 )
                 .delete()

@@ -19,12 +19,11 @@ repos:
         stages: [commit]
 
       # Type checking with ty (Rust-based type checker from Astral)
-      # Note: ty is in alpha but very fast - available via `ty check src/ tests/`
-      # Currently disabled in hooks until type annotations are fully cleaned up
-      # - id: ty-check
-      #   name: ty type checking
-      #   entry: ty check
-      #   language: system
-      #   types: [python]
-      #   pass_filenames: false
-      #   stages: [commit]
+      # Note: ty is in alpha but very fast - available via `uvx ty check src/ tests/`
+      - id: ty-check
+        name: ty type checking
+        entry: uvx ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [commit]

@@ -1,6 +1,6 @@
 """Report generation for test results."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from retrocode.models import TestResult
@@ -23,7 +23,7 @@ class MarkdownReporter:
         lines = []
         lines.append(f"# {title}")
         lines.append("")
-        lines.append(f"**Generated:** {datetime.utcnow().isoformat()}")
+        lines.append(f"**Generated:** {datetime.now(timezone.utc).isoformat()}")
         lines.append("")
 
         # Summary statistics
@@ -205,7 +205,7 @@ h1 { color: #333; }
 
         # Header
         lines.append(f"<h1>{title}</h1>")
-        lines.append(f"<p><strong>Generated:</strong> {datetime.utcnow().isoformat()}</p>")
+        lines.append(f"<p><strong>Generated:</strong> {datetime.now(timezone.utc).isoformat()}</p>")
 
         # Summary
         total = len(results)
@@ -254,7 +254,7 @@ h1 { color: #333; }
 
         # Footer
         lines.append("<div class='footer'>")
-        lines.append(f"<p>Report generated at {datetime.utcnow().isoformat()}</p>")
+        lines.append(f"<p>Report generated at {datetime.now(timezone.utc).isoformat()}</p>")
         lines.append("</div>")
 
         lines.append("</div>")

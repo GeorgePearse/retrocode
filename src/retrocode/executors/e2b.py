@@ -36,7 +36,7 @@ class SandboxPool:
         """Lazily import e2b module."""
         if self._e2b_module is None:
             try:
-                import e2b  # noqa: F401
+                import e2b  # type: ignore[import-not-found]
 
                 self._e2b_module = e2b
             except ImportError:

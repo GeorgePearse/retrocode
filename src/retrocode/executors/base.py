@@ -1,7 +1,7 @@
 """Base executor interface for running tests in different environments."""
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,7 +23,7 @@ class ExecutionContext(BaseModel):
     sandbox_info: Optional[dict[str, Any]] = None
     execution_mode: str = "local"  # "local" or "e2b"
     error_message: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ExecutorBackend(ABC):

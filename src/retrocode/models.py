@@ -1,7 +1,7 @@
 """Data models for the backtesting framework."""
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 def _utc_now() -> datetime:
     """Get current UTC time as timezone-aware datetime."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 class AssertionType(str, Enum):

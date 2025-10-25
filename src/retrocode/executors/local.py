@@ -19,7 +19,7 @@ class LocalExecutor(ExecutorBackend):
         """
         self.agent = AgentInvoker(api_key=api_key)
 
-    async def execute_test(
+    def execute_test(
         self,
         test_case: TestCase,
         test_suite: TestSuite,
@@ -66,10 +66,10 @@ class LocalExecutor(ExecutorBackend):
                 exit_code=1,
             )
 
-    async def setup(self) -> None:
+    def setup(self) -> None:
         """No setup needed for local executor."""
         pass
 
-    async def teardown(self) -> None:
+    def teardown(self) -> None:
         """No cleanup needed for local executor."""
         pass

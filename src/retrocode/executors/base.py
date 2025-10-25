@@ -31,7 +31,7 @@ class ExecutorBackend(ABC):
     """Abstract base class for test execution backends."""
 
     @abstractmethod
-    async def execute_test(
+    def execute_test(
         self,
         test_case: TestCase,
         test_suite: TestSuite,
@@ -51,12 +51,12 @@ class ExecutorBackend(ABC):
         pass
 
     @abstractmethod
-    async def setup(self) -> None:
+    def setup(self) -> None:
         """Set up the execution environment."""
         pass
 
     @abstractmethod
-    async def teardown(self) -> None:
+    def teardown(self) -> None:
         """Clean up the execution environment."""
         pass
 

@@ -1,15 +1,14 @@
 """Unit tests for E2BExecutor template building and caching."""
 
-import hashlib
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
+from retrocode.executors.base import ExecutionError
 from retrocode.executors.e2b import E2BExecutor
-from retrocode.executors.base import ExecutionError, SandboxConfig
 
 
 class TestE2BExecutorTemplateBuilding:
@@ -48,7 +47,7 @@ RUN cargo install ripgrep
     @pytest.fixture
     def executor(self, temp_cache_dir):
         """Create an E2BExecutor with temporary cache."""
-        with patch('retrocode.executors.e2b.AgentInvoker'):
+        with patch("retrocode.executors.e2b.AgentInvoker"):
             executor = E2BExecutor(cache_dir=temp_cache_dir)
             yield executor
 
@@ -85,7 +84,7 @@ RUN cargo install ripgrep
             "curated_templates": {
                 "base": {"template_id": "tmpl_abc123"},
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
         cache_path = temp_cache_dir / "template-mapping.json"
         with open(cache_path, "w") as f:
@@ -112,7 +111,7 @@ RUN cargo install ripgrep
             "curated_templates": {
                 "base": {"template_id": "tmpl_xyz789"},
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
 
         executor._save_template_cache()
@@ -134,7 +133,7 @@ RUN cargo install ripgrep
                 "base": {"template_id": "tmpl_abc123"},
                 "claude-tools": {"template_id": "tmpl_def456"},
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
 
         template_id = executor._get_curated_template("base")
@@ -142,10 +141,7 @@ RUN cargo install ripgrep
 
     def test_get_curated_template_not_exists(self, executor):
         """Test getting a curated template that doesn't exist."""
-        executor._template_cache = {
-            "curated_templates": {},
-            "custom_templates": {}
-        }
+        executor._template_cache = {"curated_templates": {}, "custom_templates": {}}
 
         template_id = executor._get_curated_template("base")
         assert template_id is None
@@ -155,9 +151,7 @@ RUN cargo install ripgrep
         content_hash = "abc123def456"
         executor._template_cache = {
             "curated_templates": {},
-            "custom_templates": {
-                content_hash: {"template_id": "tmpl_custom123"}
-            }
+            "custom_templates": {content_hash: {"template_id": "tmpl_custom123"}},
         }
 
         template_id = executor._get_cached_template(content_hash)
@@ -165,10 +159,7 @@ RUN cargo install ripgrep
 
     def test_get_cached_template_not_exists(self, executor):
         """Test getting a custom template that doesn't exist."""
-        executor._template_cache = {
-            "curated_templates": {},
-            "custom_templates": {}
-        }
+        executor._template_cache = {"curated_templates": {}, "custom_templates": {}}
 
         template_id = executor._get_cached_template("nonexistent_hash")
         assert template_id is None
@@ -178,9 +169,12 @@ RUN cargo install ripgrep
         # Set up initial cache
         executor._template_cache = {
             "curated_templates": {
-                "base": {"template_id": None, "dockerfile": ".retrocode/environments/base.Dockerfile"},
+                "base": {
+                    "template_id": None,
+                    "dockerfile": ".retrocode/environments/base.Dockerfile",
+                },
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
 
         # Cache the template
@@ -190,24 +184,26 @@ RUN cargo install ripgrep
 
     def test_cache_template_custom(self, executor, temp_env_dir):
         """Test caching a custom template."""
-        executor._template_cache = {
-            "curated_templates": {},
-            "custom_templates": {}
-        }
+        executor._template_cache = {"curated_templates": {}, "custom_templates": {}}
 
         content_hash = "custom_hash_123"
         dockerfile_path = temp_env_dir / "base.Dockerfile"
 
         executor._cache_template(content_hash, "tmpl_custom789", dockerfile_path)
 
-        assert executor._template_cache["custom_templates"][content_hash]["template_id"] == "tmpl_custom789"
-        assert executor._template_cache["custom_templates"][content_hash]["dockerfile_path"] == str(dockerfile_path)
+        assert (
+            executor._template_cache["custom_templates"][content_hash]["template_id"]
+            == "tmpl_custom789"
+        )
+        assert executor._template_cache["custom_templates"][content_hash]["dockerfile_path"] == str(
+            dockerfile_path
+        )
 
     def test_build_template_generates_template_id(self, executor, temp_env_dir):
         """Test that _build_template generates a template ID."""
         dockerfile_path = temp_env_dir / "base.Dockerfile"
 
-        with patch.object(executor.pool, '_get_e2b_module'):
+        with patch.object(executor.pool, "_get_e2b_module"):
             template_id = executor._build_template(dockerfile_path)
 
         # Should be in format: tmpl_<first 16 chars of hash>
@@ -216,7 +212,7 @@ RUN cargo install ripgrep
 
     def test_build_template_file_not_found(self, executor):
         """Test that _build_template raises error for non-existent Dockerfile."""
-        with patch.object(executor.pool, '_get_e2b_module'):
+        with patch.object(executor.pool, "_get_e2b_module"):
             with pytest.raises(ExecutionError, match="Failed to build template"):
                 executor._build_template(Path("nonexistent.Dockerfile"))
 
@@ -227,10 +223,10 @@ RUN cargo install ripgrep
             "curated_templates": {
                 "base": {"template_id": "tmpl_cached123"},
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
 
-        with patch.object(executor, '_build_template') as mock_build:
+        with patch.object(executor, "_build_template") as mock_build:
             template_id = executor._build_or_get_template(template_name="base")
 
         # Should return cached template without building
@@ -251,12 +247,15 @@ RUN cargo install ripgrep
 
         executor._template_cache = {
             "curated_templates": {
-                "base": {"dockerfile": ".retrocode/environments/base.Dockerfile", "template_id": None},
+                "base": {
+                    "dockerfile": ".retrocode/environments/base.Dockerfile",
+                    "template_id": None,
+                },
             },
-            "custom_templates": {}
+            "custom_templates": {},
         }
 
-        with patch.object(executor.pool, '_get_e2b_module'):
+        with patch.object(executor.pool, "_get_e2b_module"):
             template_id = executor._build_or_get_template(template_name="base")
 
         # Should build new template
@@ -271,12 +270,10 @@ RUN cargo install ripgrep
 
         executor._template_cache = {
             "curated_templates": {},
-            "custom_templates": {
-                content_hash: {"template_id": "tmpl_custom_cached"}
-            }
+            "custom_templates": {content_hash: {"template_id": "tmpl_custom_cached"}},
         }
 
-        with patch.object(executor, '_build_template') as mock_build:
+        with patch.object(executor, "_build_template") as mock_build:
             template_id = executor._build_or_get_template(dockerfile_path=dockerfile_path)
 
         # Should return cached template without building
@@ -287,23 +284,24 @@ RUN cargo install ripgrep
         """Test _build_or_get_template builds uncached custom Dockerfile."""
         dockerfile_path = temp_env_dir / "base.Dockerfile"
 
-        executor._template_cache = {
-            "curated_templates": {},
-            "custom_templates": {}
-        }
+        executor._template_cache = {"curated_templates": {}, "custom_templates": {}}
 
-        with patch.object(executor.pool, '_get_e2b_module'):
+        with patch.object(executor.pool, "_get_e2b_module"):
             template_id = executor._build_or_get_template(dockerfile_path=dockerfile_path)
 
         # Should build new template
         assert template_id.startswith("tmpl_")
         # Cache should be updated
         content_hash = executor._hash_dockerfile(dockerfile_path)
-        assert executor._template_cache["custom_templates"][content_hash]["template_id"] == template_id
+        assert (
+            executor._template_cache["custom_templates"][content_hash]["template_id"] == template_id
+        )
 
     def test_build_or_get_template_no_args_raises_error(self, executor):
         """Test that _build_or_get_template raises error with no arguments."""
-        with pytest.raises(ExecutionError, match="Either dockerfile_path or template_name must be provided"):
+        with pytest.raises(
+            ExecutionError, match="Either dockerfile_path or template_name must be provided"
+        ):
             executor._build_or_get_template()
 
     def test_inject_environment_vars_validates_input(self, executor):
@@ -352,14 +350,14 @@ class TestE2BExecutorCaching:
         """Test that template cache persists across executor instances."""
         monkeypatch.chdir(temp_env_dir.parent)
 
-        with patch('retrocode.executors.e2b.AgentInvoker'):
+        with patch("retrocode.executors.e2b.AgentInvoker"):
             # First executor builds template
             executor1 = E2BExecutor(cache_dir=temp_cache_dir)
             executor1._template_cache = {
                 "curated_templates": {
                     "base": {"template_id": "tmpl_persistent123"},
                 },
-                "custom_templates": {}
+                "custom_templates": {},
             }
             executor1._save_template_cache()
 
@@ -375,12 +373,14 @@ class TestE2BExecutorCaching:
         dockerfile1.write_text("FROM python:3.11\nRUN pip install anthropic\n")
 
         dockerfile2 = temp_env_dir / "custom2.Dockerfile"
-        dockerfile2.write_text("FROM python:3.11\nRUN pip install anthropic\nRUN pip install pydantic\n")
+        dockerfile2.write_text(
+            "FROM python:3.11\nRUN pip install anthropic\nRUN pip install pydantic\n"
+        )
 
-        with patch('retrocode.executors.e2b.AgentInvoker'):
+        with patch("retrocode.executors.e2b.AgentInvoker"):
             executor = E2BExecutor(cache_dir=temp_cache_dir)
 
-            with patch.object(executor.pool, '_get_e2b_module'):
+            with patch.object(executor.pool, "_get_e2b_module"):
                 # Build first custom template
                 template_id1 = executor._build_or_get_template(dockerfile_path=dockerfile1)
 

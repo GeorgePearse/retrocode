@@ -4,8 +4,8 @@ import time
 from typing import Optional
 
 from retrocode.agent import AgentInvoker
-from retrocode.models import TestCase, TestSuite
 from retrocode.executors.base import ExecutionContext, ExecutorBackend
+from retrocode.models import TestCase, TestSuite
 
 
 class LocalExecutor(ExecutorBackend):
@@ -40,8 +40,7 @@ class LocalExecutor(ExecutorBackend):
             agent_response = self.agent.invoke(
                 task=test_case.task,
                 instruction_file_path=test_suite.metadata.get(
-                    "instruction_file",
-                    "/home/georgepearse/CLAUDE.md"
+                    "instruction_file", "/home/georgepearse/CLAUDE.md"
                 ),
                 model=test_suite.model_under_test,
             )

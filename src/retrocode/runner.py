@@ -68,10 +68,7 @@ class TestRunner:
                     task=test_case.task,
                     full_response=execution_context.error_message,
                     model=test_suite.model_under_test,
-                    instruction_file_path=test_suite.metadata.get(
-                        "instruction_file",
-                        "unknown"
-                    ),
+                    instruction_file_path=test_suite.metadata.get("instruction_file", "unknown"),
                 )
         except Exception as e:
             # Return failed result if execution fails
@@ -107,7 +104,11 @@ class TestRunner:
 
         # Determine overall pass/fail
         # Fail if any error-level assertion fails
-        errors = [r for r in assertion_results if not r.passed and r.assertion.severity == AssertionSeverity.ERROR]
+        errors = [
+            r
+            for r in assertion_results
+            if not r.passed and r.assertion.severity == AssertionSeverity.ERROR
+        ]
         passed = len(errors) == 0
 
         duration = time.time() - start_time

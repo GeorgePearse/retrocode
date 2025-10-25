@@ -3,11 +3,10 @@
 import hashlib
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any, Optional
 
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
 
@@ -99,12 +98,16 @@ class JudgeCache:
         with self.SessionLocal() as session:
             from sqlalchemy import and_
 
-            entry = session.query(CacheEntry).filter(
-                and_(
-                    CacheEntry.cache_key == cache_key,
-                    CacheEntry.judge_model == judge_model,
+            entry = (
+                session.query(CacheEntry)
+                .filter(
+                    and_(
+                        CacheEntry.cache_key == cache_key,
+                        CacheEntry.judge_model == judge_model,
+                    )
                 )
-            ).first()
+                .first()
+            )
 
             if not entry:
                 return None
@@ -167,11 +170,15 @@ class JudgeCache:
         with self.SessionLocal() as session:
             from sqlalchemy import and_
 
-            result = session.query(CacheEntry).filter(
-                and_(
-                    CacheEntry.expires_at != None,
-                    CacheEntry.expires_at < datetime.utcnow(),
+            result = (
+                session.query(CacheEntry)
+                .filter(
+                    and_(
+                        CacheEntry.expires_at is not None,
+                        CacheEntry.expires_at < datetime.utcnow(),
+                    )
                 )
-            ).delete()
+                .delete()
+            )
             session.commit()
             return result

@@ -3,9 +3,8 @@
 import ast
 import re
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from retrocode.models import AgentResponse, Assertion, AssertionResult, AssertionType
+from retrocode.models import AgentResponse, Assertion, AssertionResult
 
 
 class CodeAnalyzer(ABC):

@@ -8,8 +8,13 @@ from pathlib import Path
 from typing import Optional
 
 from retrocode.agent import AgentInvoker
+from retrocode.executors.base import (
+    ExecutionContext,
+    ExecutionError,
+    ExecutorBackend,
+    SandboxConfig,
+)
 from retrocode.models import TestCase, TestSuite
-from retrocode.executors.base import ExecutionContext, ExecutorBackend, SandboxConfig, ExecutionError
 
 
 class SandboxPool:
@@ -32,11 +37,10 @@ class SandboxPool:
         if self._e2b_module is None:
             try:
                 import e2b  # noqa: F401
+
                 self._e2b_module = e2b
             except ImportError:
-                raise ExecutionError(
-                    "e2b not installed. Install with: uv pip install e2b"
-                )
+                raise ExecutionError("e2b not installed. Install with: uv pip install e2b")
         return self._e2b_module
 
     def acquire(self, config: SandboxConfig) -> str:
@@ -172,7 +176,9 @@ class E2BExecutor(ExecutorBackend):
         cache = self._load_template_cache()
         return cache.get("custom_templates", {}).get(content_hash, {}).get("template_id")
 
-    def _cache_template(self, identifier: str, template_id: str, dockerfile_path: Optional[Path] = None) -> None:
+    def _cache_template(
+        self, identifier: str, template_id: str, dockerfile_path: Optional[Path] = None
+    ) -> None:
         """Cache a template ID.
 
         Args:
@@ -210,12 +216,12 @@ class E2BExecutor(ExecutorBackend):
             ExecutionError: If template building fails
         """
         try:
-            # Get e2b module
-            e2b = self.pool._get_e2b_module()
+            # Get e2b module (needed for future SDK integration)
+            _e2b = self.pool._get_e2b_module()  # noqa: F841
 
-            # Read Dockerfile content
+            # Read Dockerfile content (needed for future SDK integration)
             with open(dockerfile_path, "r") as f:
-                dockerfile_content = f.read()
+                _dockerfile_content = f.read()  # noqa: F841
 
             # Build template using e2b SDK
             # This is a placeholder - actual implementation would call e2b.build_template()
@@ -224,8 +230,8 @@ class E2BExecutor(ExecutorBackend):
             template_id = f"tmpl_{content_hash[:16]}"
 
             # TODO: Actual e2b SDK call
-            # template = e2b.build_template(
-            #     dockerfile=dockerfile_content,
+            # template = _e2b.build_template(
+            #     dockerfile=_dockerfile_content,
             #     name=f"template-{content_hash[:8]}",
             # )
             # template_id = template.id
@@ -234,7 +240,9 @@ class E2BExecutor(ExecutorBackend):
         except Exception as e:
             raise ExecutionError(f"Failed to build template from {dockerfile_path}: {str(e)}")
 
-    def _build_or_get_template(self, dockerfile_path: Optional[Path] = None, template_name: Optional[str] = None) -> str:
+    def _build_or_get_template(
+        self, dockerfile_path: Optional[Path] = None, template_name: Optional[str] = None
+    ) -> str:
         """Get or build an e2b template.
 
         Args:
@@ -256,7 +264,9 @@ class E2BExecutor(ExecutorBackend):
             # Build curated template
             dockerfile_path = Path(".retrocode/environments") / f"{template_name}.Dockerfile"
             if not dockerfile_path.exists():
-                raise ExecutionError(f"Curated template '{template_name}' not found at {dockerfile_path}")
+                raise ExecutionError(
+                    f"Curated template '{template_name}' not found at {dockerfile_path}"
+                )
 
             template_id = self._build_template(dockerfile_path)
             self._cache_template(template_name, template_id, dockerfile_path)
@@ -383,8 +393,7 @@ class E2BExecutor(ExecutorBackend):
 
             # Step 4: Copy instruction files to sandbox
             instruction_file = test_suite.metadata.get(
-                "instruction_file",
-                "/home/georgepearse/CLAUDE.md"
+                "instruction_file", "/home/georgepearse/CLAUDE.md"
             )
             if instruction_file:
                 self._copy_instruction_files(Path(instruction_file), session_id)

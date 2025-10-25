@@ -9,9 +9,7 @@ from retrocode.parser import YAMLTestParser
 from retrocode.runner import TestRunner
 
 
-def pytest_collect_file(
-    file_path: Path, parent: Any
-) -> Optional["BacktestFile"]:
+def pytest_collect_file(file_path: Path, parent: Any) -> Optional["BacktestFile"]:
     """pytest hook to collect .backtest.yaml files.
 
     Args:

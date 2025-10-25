@@ -6,7 +6,6 @@ from retrocode.assertions import (
     AssertionRegistry,
     CodeContainsEvaluator,
     CodeExcludesEvaluator,
-    PRMatchEvaluator,
 )
 from retrocode.code_matching import PythonASTMatcher, get_matcher
 from retrocode.models import (
@@ -14,9 +13,7 @@ from retrocode.models import (
     Assertion,
     AssertionTarget,
     AssertionType,
-    AssertionSeverity,
 )
-
 
 # ============================================================================
 # CodeMatcher Tests

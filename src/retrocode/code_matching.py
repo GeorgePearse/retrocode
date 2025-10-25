@@ -256,8 +256,7 @@ def get_matcher(language: str) -> AbstractCodeMatcher:
     """
     if language not in _MATCHERS:
         raise ValueError(
-            f"Unsupported language: {language}. "
-            f"Supported: {list(_MATCHERS.keys())}"
+            f"Unsupported language: {language}. " f"Supported: {list(_MATCHERS.keys())}"
         )
 
     return _MATCHERS[language]()

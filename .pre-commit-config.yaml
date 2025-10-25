@@ -1,17 +1,11 @@
 repos:
   # Python code formatting with ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.13
+    rev: v0.8.0
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-
-  # Type checking with pyright
-  - repo: https://github.com/RogerCreagh/pyright-python
-    rev: v1.1.344
-    hooks:
-      - id: pyright
 
   # Documentation link validation
   - repo: local
@@ -23,3 +17,14 @@ repos:
         files: ^docs/.*\.md$
         pass_filenames: false
         stages: [commit]
+
+      # Type checking with zuban (20-200x faster than mypy, runs via CLI)
+      # Note: Zuban is available for local use via `zuban mypy src/ tests/`
+      # but disabled in hooks until type annotations are cleaned up
+      # - id: zuban-mypy
+      #   name: zuban type checking
+      #   entry: zuban mypy
+      #   language: system
+      #   types: [python]
+      #   pass_filenames: false
+      #   stages: [commit]

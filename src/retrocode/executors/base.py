@@ -1,7 +1,6 @@
 """Base executor interface for running tests in different environments."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Optional
 
@@ -81,9 +80,7 @@ class SandboxConfig(BaseModel):
                 "template": "claude-tools",
                 "timeout_seconds": 600,
                 "memory_limit_mb": 4096,
-                "environment_vars": {
-                    "LOG_LEVEL": "DEBUG"
-                }
+                "environment_vars": {"LOG_LEVEL": "DEBUG"},
             }
         }
     )

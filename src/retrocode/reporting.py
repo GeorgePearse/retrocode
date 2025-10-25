@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from retrocode.models import TestResult
 
@@ -219,8 +218,12 @@ h1 { color: #333; }
         lines.append(f"<div class='summary-item'><strong>Total Tests</strong><br>{total}</div>")
         lines.append(f"<div class='summary-item passed'><strong>Passed</strong><br>{passed}</div>")
         lines.append(f"<div class='summary-item failed'><strong>Failed</strong><br>{failed}</div>")
-        lines.append(f"<div class='summary-item'><strong>Pass Rate</strong><br>{pass_rate:.1f}%</div>")
-        lines.append(f"<div class='summary-item'><strong>Duration</strong><br>{total_duration:.2f}s</div>")
+        lines.append(
+            f"<div class='summary-item'><strong>Pass Rate</strong><br>{pass_rate:.1f}%</div>"
+        )
+        lines.append(
+            f"<div class='summary-item'><strong>Duration</strong><br>{total_duration:.2f}s</div>"
+        )
         lines.append("</div>")
 
         # Test results
@@ -230,10 +233,10 @@ h1 { color: #333; }
             status_text = "PASSED" if result.passed else "FAILED"
 
             lines.append(f"<div class='test-item {status_class}'>")
-            lines.append(f"<p class='test-title'>")
+            lines.append("<p class='test-title'>")
             lines.append(f"<span class='test-status {status_class}'>{status_text}</span>")
             lines.append(f"{result.test_case.description}")
-            lines.append(f"</p>")
+            lines.append("</p>")
             lines.append(f"<p><strong>Duration:</strong> {result.duration_seconds:.2f}s</p>")
 
             if result.assertion_results:

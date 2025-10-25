@@ -113,7 +113,6 @@ class PRFetcher:
         for file in pr.get_files():
             # Fetch full file content at head and base
             try:
-                head_content = file.patch or ""
                 # Use patch for now; can be improved to fetch full files
                 files.append(
                     FileChange(

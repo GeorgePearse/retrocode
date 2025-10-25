@@ -3,10 +3,6 @@
 import json
 import re
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Optional
-
-from pydantic import ValidationError, validate_call
 
 from retrocode.models import (
     AgentResponse,
@@ -267,9 +263,7 @@ class PRMatchEvaluator(AssertionEvaluator):
 
             # Simple matching: check if any files from PR are mentioned in output
             # TODO: Implement proper diff matching with configurable match_level
-            matched_files = sum(
-                1 for file in pr_data.files if file.path in target_content
-            )
+            matched_files = sum(1 for file in pr_data.files if file.path in target_content)
             score = matched_files / len(pr_data.files) if pr_data.files else 0.0
 
             passed = score >= threshold
@@ -427,9 +421,7 @@ class AssertionRegistry:
     }
 
     @classmethod
-    def evaluate(
-        cls, assertion: Assertion, response: AgentResponse
-    ) -> AssertionResult:
+    def evaluate(cls, assertion: Assertion, response: AgentResponse) -> AssertionResult:
         """Evaluate assertion using registered evaluator.
 
         Args:

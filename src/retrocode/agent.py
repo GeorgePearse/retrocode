@@ -65,13 +65,9 @@ Follow these instructions exactly:
 
 Respond to the user's request while adhering to these guidelines."""
 
-        conversation_trace.append(
-            {"role": "system", "content": system_prompt}
-        )
+        conversation_trace.append({"role": "system", "content": system_prompt})
 
-        conversation_trace.append(
-            {"role": "user", "content": task}
-        )
+        conversation_trace.append({"role": "user", "content": task})
 
         response = self.client.messages.create(
             model=model,
@@ -82,9 +78,7 @@ Respond to the user's request while adhering to these guidelines."""
 
         full_response = response.content[0].text
 
-        conversation_trace.append(
-            {"role": "assistant", "content": full_response}
-        )
+        conversation_trace.append({"role": "assistant", "content": full_response})
 
         agent_response = AgentResponse(
             task=task,
@@ -134,7 +128,6 @@ Respond to the user's request while adhering to these guidelines."""
         code_blocks = []
         current_block = ""
         in_code = False
-        fence_type = ""
 
         for line in response.split("\n"):
             if line.startswith("```"):
@@ -145,7 +138,6 @@ Respond to the user's request while adhering to these guidelines."""
                     in_code = False
                 else:
                     in_code = True
-                    fence_type = line[3:].strip()
             elif in_code:
                 current_block += line + "\n"
 

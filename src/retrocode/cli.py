@@ -163,7 +163,7 @@ def list_tests(tests: str) -> None:
         click.echo(f"\n{suite.name}")
         click.echo(f"  Description: {suite.description}")
         click.echo(f"  Instruction version: {suite.instructions_version}")
-        click.echo(f"  Test cases:")
+        click.echo("  Test cases:")
         for test_case in suite.test_cases:
             click.echo(f"    - {test_case.description}")
             for assertion in test_case.assertions:

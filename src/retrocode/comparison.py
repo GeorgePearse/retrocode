@@ -73,9 +73,7 @@ class VersionComparator:
         if not result.assertion_results:
             return None
 
-        scores = [
-            ar.score for ar in result.assertion_results if ar.score is not None
-        ]
+        scores = [ar.score for ar in result.assertion_results if ar.score is not None]
 
         if not scores:
             return None
@@ -122,7 +120,7 @@ class VersionComparator:
             lines.append("## Regressions ⚠️\n")
             for base, cand in comparison.regressions:
                 lines.append(f"- **{base.test_case.description}**")
-                lines.append(f"  - Was passing in baseline")
+                lines.append("  - Was passing in baseline")
                 failures = cand.failures
                 if failures:
                     for f in failures[:3]:
@@ -133,14 +131,12 @@ class VersionComparator:
             lines.append("## Improvements ✓\n")
             for base, cand in comparison.improvements:
                 lines.append(f"- **{base.test_case.description}**")
-                lines.append(f"  - Was failing in baseline")
-                lines.append(f"  - Now passing in candidate")
+                lines.append("  - Was failing in baseline")
+                lines.append("  - Now passing in candidate")
                 lines.append("")
 
         if comparison.score_deltas:
-            significant_deltas = {
-                k: v for k, v in comparison.score_deltas.items() if abs(v) > 0.05
-            }
+            significant_deltas = {k: v for k, v in comparison.score_deltas.items() if abs(v) > 0.05}
             if significant_deltas:
                 lines.append("## Score Changes\n")
                 for desc, delta in sorted(

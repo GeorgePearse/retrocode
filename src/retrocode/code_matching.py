@@ -105,16 +105,29 @@ class PythonASTMatcher(AbstractCodeMatcher):
     language = "python"
 
     def match_exact(self, expected: str, actual: str) -> MatchResult:
-        """Check for exact string match (ignoring whitespace)."""
+        """Check for exact string match or substring containment.
+
+        First checks for exact match (after normalization).
+        If that fails, checks if expected is contained in actual (for snippet matching).
+        """
         # Normalize whitespace
         expected_normalized = " ".join(expected.split())
         actual_normalized = " ".join(actual.split())
 
+        # Check for exact match
         if expected_normalized == actual_normalized:
             return MatchResult(
                 matched=True,
                 score=1.0,
                 message="Exact match (after whitespace normalization)",
+            )
+
+        # Check for substring containment (useful for code snippet matching)
+        if expected_normalized in actual_normalized:
+            return MatchResult(
+                matched=True,
+                score=0.95,  # Slightly lower than exact match
+                message="Code snippet found in output (substring match)",
             )
 
         return MatchResult(

@@ -9,6 +9,7 @@ on:
       - 'pyproject.toml'
       - '.github/workflows/docs-deploy.yml'
       - 'README.md'
+  workflow_dispatch:
 
 permissions:
   contents: read

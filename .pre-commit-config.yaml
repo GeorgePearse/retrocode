@@ -18,12 +18,12 @@ repos:
         pass_filenames: false
         stages: [commit]
 
-      # Type checking with zuban (20-200x faster than mypy, runs via CLI)
-      # Note: Zuban is available for local use via `zuban mypy src/ tests/`
-      # but disabled in hooks until type annotations are cleaned up
-      # - id: zuban-mypy
-      #   name: zuban type checking
-      #   entry: zuban mypy
+      # Type checking with ty (Rust-based type checker from Astral)
+      # Note: ty is in alpha but very fast - available via `ty check src/ tests/`
+      # Currently disabled in hooks until type annotations are fully cleaned up
+      # - id: ty-check
+      #   name: ty type checking
+      #   entry: ty check
       #   language: system
       #   types: [python]
       #   pass_filenames: false

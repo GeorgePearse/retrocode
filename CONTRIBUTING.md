@@ -42,28 +42,29 @@ Thanks for your interest in contributing to retrocode! This guide covers setup, 
 
 This project uses modern Rust-based tools for faster development feedback.
 
-### Type Checking: Zuban
+### Type Checking: Ty
 
-[Zuban](https://zubanls.com/) is a 20-200x faster type checker implemented in Rust, created by the author of Jedi.
+[Ty](https://github.com/astral-sh/ty) is an extremely fast type checker implemented in Rust by Astral (creators of Ruff).
 
 **Run type checking locally:**
 ```bash
 # Check source code
-zuban mypy src/
+uvx ty check src/
 
 # Check tests
-zuban mypy tests/
+uvx ty check tests/
 
 # Check both
-zuban mypy src/ tests/
+uvx ty check src/ tests/
 ```
 
 **Features:**
 - Mypy-compatible configuration (uses existing `[tool.mypy]` in pyproject.toml)
-- Blazing fast performance compared to mypy
-- Available in your IDE via zubanls language server
+- Blazingly fast performance (Rust-based)
+- Integrates seamlessly with Ruff (same team)
+- Uses uvx for convenient invocation
 
-**Note:** Zuban is disabled in pre-commit hooks until type annotations are cleaned up. Enable it locally with the commands above.
+**Note:** Ty is disabled in pre-commit hooks until type annotations are cleaned up. Enable it locally with the commands above.
 
 ### Linting & Formatting: Ruff
 
@@ -221,11 +222,12 @@ Install prek:
 uv tool install prek
 ```
 
-### "zuban not found"
+### "ty not found"
 
-Install zuban:
+Ty is invoked via `uvx`, which should work automatically. If you encounter issues, you can install it globally:
 ```bash
-uv pip install zuban
+uv tool install ty
+ty check src/
 ```
 
 ### Pre-commit hooks fail
@@ -236,8 +238,8 @@ Run the failing tool to see what's wrong:
 ruff check src/
 ruff format src/
 
-# If zuban fails (optional)
-zuban mypy src/
+# If ty fails (optional)
+uvx ty check src/
 ```
 
 Most errors can be auto-fixed:
@@ -256,7 +258,7 @@ ruff format src/ tests/
 
 1. **Use prek instead of pre-commit** - It's much faster
 2. **Format with ruff instead of black** - It's faster and more capable
-3. **Type-check with zuban instead of mypy** - It's dramatically faster
+3. **Type-check with ty instead of mypy** - It's dramatically faster
 4. **Run pytest with `-n auto`** - Parallel test execution is faster
 
 ## Architecture Overview

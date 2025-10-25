@@ -169,10 +169,10 @@ test_cases:
 
 ## Next Steps
 
-- **[Write Tests](../guides/writing-tests.md)** - Learn the complete YAML format
-- **[Assertion Types](../guides/assertions.md)** - See all 7 assertion types
-- **[Advanced Features](../guides/advanced.md)** - Caching, custom validators, snapshots
-- **[Examples](../examples/basic-test.md)** - More real-world examples
+- **[Write Tests](guides/writing-tests.md)** - Learn the complete YAML format
+- **[Assertion Types](guides/assertions.md)** - See all 10 assertion types
+- **[Advanced Features](guides/advanced.md)** - Caching, custom validators, snapshots
+- **[Examples](examples/basic-test.md)** - More real-world examples
 
 ## Troubleshooting
 
@@ -204,7 +204,7 @@ tests/backtests/test_my_rules.py
 
 ## Getting Help
 
-- Check the [Full Documentation](../guides/writing-tests.md)
-- Review [Examples](../examples/basic-test.md)
-- Read [Research & Design](../research/inspirations.md)
+- Check the [Full Documentation](guides/writing-tests.md)
+- Review [Examples](examples/basic-test.md)
+- Read [Research & Design](research/inspirations.md)
 - Open an issue on [GitHub](https://github.com/GeorgePearse/ai-backtest/issues)

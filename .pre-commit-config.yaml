@@ -1,0 +1,25 @@
+repos:
+  # Python code formatting with ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.13
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Type checking with pyright
+  - repo: https://github.com/RogerCreagh/pyright-python
+    rev: v1.1.344
+    hooks:
+      - id: pyright
+
+  # Documentation link validation
+  - repo: local
+    hooks:
+      - id: check-doc-links
+        name: Check documentation links
+        entry: python scripts/check_doc_links.py
+        language: python
+        files: ^docs/.*\.md$
+        pass_filenames: false
+        stages: [commit]

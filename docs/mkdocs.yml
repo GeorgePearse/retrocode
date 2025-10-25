@@ -5,6 +5,9 @@ site_url: https://github.com/GeorgePearse/ai-backtest
 repo_url: https://github.com/GeorgePearse/ai-backtest
 repo_name: ai-backtest
 
+docs_dir: '.'
+site_dir: '../public'
+
 theme:
   name: material
   features:
@@ -41,8 +44,6 @@ plugins:
       enabled: !ENV [ENABLE_MKDOCSTRINGS, true]
       handlers:
         python:
-          import:
-            - https://docs.python-requests.org/objects.inv
           options:
             docstring_style: google
             show_source: true
@@ -58,16 +59,12 @@ nav:
     - CI/CD Integration: guides/ci-cd.md
   - Reference:
     - Python API: reference/api.md
-    - CLI Commands: reference/cli.md
-    - YAML Schema: reference/yaml-schema.md
   - Examples:
     - Basic Test: examples/basic-test.md
-    - MCP Testing: examples/mcp-testing.md
-    - Regression Detection: examples/regression-detection.md
+    - PR Validation: examples/pr-validation.md
   - Research & Design:
     - Package Naming: research/naming.md
     - Inspirations & Patterns: research/inspirations.md
-    - Diff Scoring: research/diff-scoring.md
 
 markdown_extensions:
   - pymdownx.highlight:

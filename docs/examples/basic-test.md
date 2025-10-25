@@ -145,5 +145,5 @@ open report.html
 ## Next Steps
 
 - [Writing Tests](../guides/writing-tests.md) - Complete guide
-- [Assertion Types](../guides/assertions.md) - All 7 types explained
-- [Examples](mcp-testing.md) - More advanced examples
+- [Assertion Types](../guides/assertions.md) - All 10 assertion types explained
+- [PR Validation](../examples/pr-validation.md) - Validate against PRs

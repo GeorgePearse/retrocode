@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from retrocode.models import AgentResponse, TestCase, TestSuite
 
@@ -68,12 +68,38 @@ class ExecutionError(Exception):
 
 
 class SandboxConfig(BaseModel):
-    """Configuration for sandbox-based execution."""
+    """Configuration for sandbox-based execution.
 
-    template: str = "python-3.11"
+    Supports two modes:
+    1. Curated templates: Use named templates like "base" or "claude-tools"
+    2. Custom Dockerfiles: Point to a custom Dockerfile for full environment control
+    """
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "template": "claude-tools",
+                "timeout_seconds": 600,
+                "memory_limit_mb": 4096,
+                "environment_vars": {
+                    "LOG_LEVEL": "DEBUG"
+                }
+            }
+        }
+    )
+
+    # Template selection
+    template: Optional[str] = "base"  # Name of curated template (base, claude-tools, etc.)
+    custom_dockerfile: Optional[str] = None  # Path to custom Dockerfile (overrides template)
+
+    # Resource limits
     timeout_seconds: int = 300
     memory_limit_mb: int = 2048
     cpu_cores: Optional[int] = None
+
+    # Network and persistence
     enable_networking: bool = True
     preserve_on_error: bool = False
-    custom_dockerfile_path: Optional[str] = None
+
+    # Environment variables to inject
+    environment_vars: dict[str, str] = Field(default_factory=dict)

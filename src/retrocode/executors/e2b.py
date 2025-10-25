@@ -371,12 +371,15 @@ class E2BExecutor(ExecutorBackend):
             session_id = self.pool.acquire(sandbox_config)
 
             # Step 3: Inject environment variables (e.g., ANTHROPIC_API_KEY)
+            env_vars_to_inject = dict(sandbox_config.environment_vars)
+
+            # Always inject API key if available
             api_key = os.getenv("ANTHROPIC_API_KEY")
             if api_key:
-                self._inject_environment_vars(
-                    {"ANTHROPIC_API_KEY": api_key},
-                    session_id
-                )
+                env_vars_to_inject["ANTHROPIC_API_KEY"] = api_key
+
+            if env_vars_to_inject:
+                self._inject_environment_vars(env_vars_to_inject, session_id)
 
             # Step 4: Copy instruction files to sandbox
             instruction_file = test_suite.metadata.get(

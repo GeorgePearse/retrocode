@@ -257,6 +257,27 @@ class AssertionRegistry:
         Raises:
             ValueError: If assertion type is not registered
         """
+        # Special handling for LLM judge (lazy import to avoid circular dependency)
+        if assertion.type == AssertionType.LLM_JUDGE:
+            from ai_backtest.llm_judge import LLMJudgeEvaluator
+
+            evaluator = LLMJudgeEvaluator()
+            return evaluator.evaluate(assertion, response)
+
+        # Special handling for code analysis
+        if assertion.type == AssertionType.CODE_ANALYSIS:
+            from ai_backtest.code_analysis import CodeAnalysisRegistry
+
+            validator_name = assertion.metadata.get("validator", "python_type_check")
+            return CodeAnalysisRegistry.analyze(validator_name, assertion, response)
+
+        # Special handling for snapshots (lazy import)
+        if assertion.type == AssertionType.SNAPSHOT:
+            from ai_backtest.snapshots import SnapshotEvaluator
+
+            evaluator = SnapshotEvaluator()
+            return evaluator.evaluate(assertion, response)
+
         evaluator_class = cls._evaluators.get(assertion.type)
         if not evaluator_class:
             msg = f"Unknown assertion type: {assertion.type}"

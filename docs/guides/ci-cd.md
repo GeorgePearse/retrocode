@@ -39,7 +39,7 @@ jobs:
         run: uv sync
 
       - name: Run backtests
-        run: ai-backtest run --tests tests/backtests --output results.md
+        run: retrocode run --tests tests/backtests --output results.md
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
@@ -95,17 +95,17 @@ Compare against main branch:
   run: |
     git fetch origin main
     git show origin/main:tests/backtests/ > /tmp/baseline_tests/ 2>/dev/null || true
-    ai-backtest run --tests tests/backtests --output baseline.json
+    retrocode run --tests tests/backtests --output baseline.json
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 - name: Run candidate (current branch)
-  run: ai-backtest run --tests tests/backtests --output candidate.json
+  run: retrocode run --tests tests/backtests --output candidate.json
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 - name: Compare versions
-  run: ai-backtest compare --baseline baseline.json --candidate candidate.json
+  run: retrocode compare --baseline baseline.json --candidate candidate.json
 ```
 
 ## Cost Control
@@ -152,7 +152,7 @@ tests/backtests/
 
 All run in one command:
 ```bash
-ai-backtest run --tests tests/backtests/
+retrocode run --tests tests/backtests/
 ```
 
 ## Blocking Merges on Failure
@@ -194,7 +194,7 @@ comparison = VersionComparator.compare(results_v1, results_v2)
 
 ```yaml
 - name: Generate report
-  run: ai-backtest run --tests tests/backtests --html report.html
+  run: retrocode run --tests tests/backtests --html report.html
 
 - name: Upload artifact
   uses: actions/upload-artifact@v3
@@ -310,12 +310,12 @@ jobs:
       - run: uv sync
 
       # Baseline
-      - run: ai-backtest run --tests tests/backtests --output baseline.json
+      - run: retrocode run --tests tests/backtests --output baseline.json
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       # Candidate
-      - run: ai-backtest run --tests tests/backtests --html report.html
+      - run: retrocode run --tests tests/backtests --html report.html
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 

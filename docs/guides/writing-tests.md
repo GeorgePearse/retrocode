@@ -265,7 +265,7 @@ pytest tests/backtests/ -x
 
 ### Use CLI
 ```bash
-ai-backtest run --tests tests/backtests/ --html report.html
+retrocode run --tests tests/backtests/ --html report.html
 ```
 
 ## Validating Your Tests
@@ -280,7 +280,7 @@ python -c "import yaml; yaml.safe_load(open('tests/backtests/test.backtest.yaml'
 pytest tests/backtests/ -vv
 
 # Check coverage
-ai-backtest list-tests
+retrocode list-tests
 # Review all discovered tests
 ```
 
@@ -373,9 +373,9 @@ pytest tests/backtests/test.backtest.yaml -s
 
 ### Check What Was Tested
 
-Use `ai-backtest list-tests`:
+Use `retrocode list-tests`:
 ```bash
-ai-backtest list-tests --tests tests/backtests/
+retrocode list-tests --tests tests/backtests/
 ```
 
 ### Re-run with Cache Cleared

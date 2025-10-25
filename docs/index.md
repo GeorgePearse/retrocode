@@ -1,8 +1,8 @@
-# AI Backtest
+# retrocode
 
 Test instruction files like `CLAUDE.md` and `AGENTS.md` through automated backtesting. Validate that AI agent behavior follows your guidelines and detect regressions before deployment.
 
-## Why AI Backtest?
+## Why retrocode?
 
 When you modify instruction files, you need confidence that:
 
@@ -10,7 +10,7 @@ When you modify instruction files, you need confidence that:
 - ✅ Agent behavior hasn't regressed
 - ✅ New guidelines improve performance
 
-Traditional unit tests don't work for instruction files because outputs are non-deterministic. **AI Backtest** provides a rigorous framework for testing instruction changes:
+Traditional unit tests don't work for instruction files because outputs are non-deterministic. **retrocode** provides a rigorous framework for testing instruction changes:
 
 ## Key Features
 
@@ -84,25 +84,25 @@ test_cases:
 pytest tests/backtests/
 
 # Via CLI
-ai-backtest run --tests tests/backtests --html report.html
+retrocode run --tests tests/backtests --html report.html
 
 # List all tests
-ai-backtest list-tests
+retrocode list-tests
 ```
 
 ### 3. Detect Regressions
 
 ```bash
 # Run baseline
-ai-backtest run --tests tests/backtests --output baseline.json
+retrocode run --tests tests/backtests --output baseline.json
 
 # Make changes to your instructions...
 
 # Run candidate
-ai-backtest run --tests tests/backtests --output candidate.json
+retrocode run --tests tests/backtests --output candidate.json
 
 # Compare
-ai-backtest compare --baseline baseline.json --candidate candidate.json
+retrocode compare --baseline baseline.json --candidate candidate.json
 ```
 
 ## Core Concepts
@@ -181,7 +181,7 @@ Built on proven patterns from:
 
 ## License
 
-MIT - See [LICENSE](https://github.com/GeorgePearse/ai-backtest/blob/main/LICENSE)
+MIT - See [LICENSE](https://github.com/GeorgePearse/retrocode/blob/main/LICENSE)
 
 ## Contributing
 
@@ -191,4 +191,4 @@ Contributions welcome! Please ensure:
 - Tests cover new functionality
 - Pre-commit hooks pass
 
-See [CONTRIBUTING.md](https://github.com/GeorgePearse/ai-backtest/blob/main/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/GeorgePearse/retrocode/blob/main/CONTRIBUTING.md)

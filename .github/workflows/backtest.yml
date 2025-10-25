@@ -31,7 +31,7 @@ jobs:
 
       - name: Run baseline (main branch)
         run: |
-          uv run ai-backtest run \
+          uv run retrocode run \
             --tests tests/backtests/ \
             --output /tmp/baseline_results.md
         env:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Run candidate (current branch)
         run: |
-          uv run ai-backtest run \
+          uv run retrocode run \
             --tests tests/backtests/ \
             --output /tmp/candidate_results.md \
             --html /tmp/candidate_results.html
@@ -48,7 +48,7 @@ jobs:
 
       - name: Generate comparison
         run: |
-          uv run ai-backtest compare \
+          uv run retrocode compare \
             --baseline /tmp/baseline_results.md \
             --candidate /tmp/candidate_results.md \
             --output /tmp/comparison.md || true

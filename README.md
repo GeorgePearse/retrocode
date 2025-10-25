@@ -1,8 +1,8 @@
-# AI Backtest
+# retrocode
 
 A comprehensive testing framework for validating AI instruction files (like `CLAUDE.md` and `AGENTS.md`) through automated backtesting. Run your instructions through realistic tasks and verify that the AI agent follows your guidelines.
 
-## Why AI Backtest?
+## Why retrocode?
 
 When you modify instruction files, you need confidence that:
 - Your rules are still being followed
@@ -38,8 +38,8 @@ Reports (Markdown, HTML)
 ## Installation
 
 ```bash
-git clone https://github.com/your-org/ai-backtest
-cd ai-backtest
+git clone https://github.com/your-org/retrocode
+cd retrocode
 uv sync
 ```
 
@@ -86,13 +86,13 @@ test_cases:
 
 ```bash
 # Run all tests
-ai-backtest run --tests tests/backtests
+retrocode run --tests tests/backtests
 
 # Generate HTML report
-ai-backtest run --tests tests/backtests --html report.html
+retrocode run --tests tests/backtests --html report.html
 
 # List available tests
-ai-backtest list-tests
+retrocode list-tests
 ```
 
 ### 3. Use with pytest
@@ -228,13 +228,13 @@ Compare instruction versions to detect regressions:
 
 ```bash
 # Run tests against baseline
-ai-backtest run --tests tests/backtests/ --output baseline.json
+retrocode run --tests tests/backtests/ --output baseline.json
 
 # Make changes to CLAUDE.md, then run again
-ai-backtest run --tests tests/backtests/ --output candidate.json
+retrocode run --tests tests/backtests/ --output candidate.json
 
 # Compare versions
-ai-backtest compare --baseline baseline.json --candidate candidate.json
+retrocode compare --baseline baseline.json --candidate candidate.json
 ```
 
 **Report shows:**

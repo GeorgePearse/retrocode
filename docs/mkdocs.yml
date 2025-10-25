@@ -1,9 +1,9 @@
-site_name: AI Backtest
+site_name: retrocode
 site_description: Test instruction files like CLAUDE.md and AGENTS.md through automated backtesting
 site_author: George Pearse
-site_url: https://github.com/GeorgePearse/ai-backtest
-repo_url: https://github.com/GeorgePearse/ai-backtest
-repo_name: ai-backtest
+site_url: https://github.com/GeorgePearse/retrocode
+repo_url: https://github.com/GeorgePearse/retrocode
+repo_name: retrocode
 
 docs_dir: '.'
 site_dir: '../public'

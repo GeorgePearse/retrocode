@@ -134,7 +134,7 @@ After reviewing changes, update:
 
 ```bash
 # Update all snapshots
-ai-backtest run --tests tests/backtests/ --update-snapshots
+retrocode run --tests tests/backtests/ --update-snapshots
 
 # Or via pytest
 pytest tests/backtests/ --snapshot-update
@@ -174,15 +174,15 @@ Detect regressions across instruction changes.
 
 ```bash
 # Create baseline (current main branch)
-ai-backtest run --tests tests/backtests/ --output baseline.json
+retrocode run --tests tests/backtests/ --output baseline.json
 
 # Edit CLAUDE.md or AGENTS.md...
 
 # Create candidate (with your changes)
-ai-backtest run --tests tests/backtests/ --output candidate.json
+retrocode run --tests tests/backtests/ --output candidate.json
 
 # Compare
-ai-backtest compare --baseline baseline.json --candidate candidate.json
+retrocode compare --baseline baseline.json --candidate candidate.json
 ```
 
 ### Regression Report
@@ -197,7 +197,7 @@ Shows:
 
 ```yaml
 - name: Compare versions
-  run: ai-backtest compare --baseline baseline.json --candidate candidate.json
+  run: retrocode compare --baseline baseline.json --candidate candidate.json
 ```
 
 ## Custom LLM Judge Prompts

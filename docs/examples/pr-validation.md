@@ -315,7 +315,7 @@ pytest docs/examples/pr-validation.md::test_cases -v -s
 
 ```bash
 # Run tests and generate comparison against baseline
-ai-backtest run --tests docs/examples/pr-validation.md --html report.html
+retrocode run --tests docs/examples/pr-validation.md --html report.html
 ```
 
 ### Continuous Integration

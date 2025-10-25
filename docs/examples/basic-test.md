@@ -138,7 +138,7 @@ pytest tests/backtests/ -v
 ### HTML Report
 
 ```bash
-ai-backtest run --tests tests/backtests --html report.html
+retrocode run --tests tests/backtests --html report.html
 open report.html
 ```
 

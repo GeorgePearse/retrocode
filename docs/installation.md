@@ -1,6 +1,6 @@
 # Installation
 
-Complete installation guide for AI Backtest.
+Complete installation guide for retrocode.
 
 ## System Requirements
 
@@ -19,8 +19,8 @@ The fastest and most reliable installation:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone and setup
-git clone https://github.com/GeorgePearse/ai-backtest
-cd ai-backtest
+git clone https://github.com/GeorgePearse/retrocode
+cd retrocode
 uv sync
 ```
 
@@ -36,8 +36,8 @@ source .venv/bin/activate
 ### Method 2: Using pip
 
 ```bash
-git clone https://github.com/GeorgePearse/ai-backtest
-cd ai-backtest
+git clone https://github.com/GeorgePearse/retrocode
+cd retrocode
 pip install -e .
 ```
 
@@ -46,8 +46,8 @@ pip install -e .
 For contributing to the project:
 
 ```bash
-git clone https://github.com/GeorgePearse/ai-backtest
-cd ai-backtest
+git clone https://github.com/GeorgePearse/retrocode
+cd retrocode
 
 # With uv
 uv sync --all-extras
@@ -63,8 +63,8 @@ pip install -e ".[dev,docs]"
 python --version
 # Should be 3.10+
 
-# Check ai-backtest is installed
-ai-backtest --help
+# Check retrocode is installed
+retrocode --help
 
 # Run tests (should pass)
 pytest tests/
@@ -127,7 +127,7 @@ set +a
 
 Some commands accept the API key directly:
 ```bash
-ai-backtest run --api-key "sk-ant-..." --tests tests/backtests/
+retrocode run --api-key "sk-ant-..." --tests tests/backtests/
 ```
 
 ### Verify Setup
@@ -198,7 +198,7 @@ pip install -e ".[dev,docs]"
 
 ## Troubleshooting
 
-### "command not found: ai-backtest"
+### "command not found: retrocode"
 
 The CLI wasn't installed properly. Try:
 
@@ -207,7 +207,7 @@ The CLI wasn't installed properly. Try:
 source .venv/bin/activate
 
 # If using pip in virtualenv
-which ai-backtest
+which retrocode
 # Should show path to executable
 
 # If not found, reinstall
@@ -275,5 +275,5 @@ Once installed:
 ## Getting Help
 
 - 📚 [Full Documentation](index.md)
-- 🐛 [Report Issues](https://github.com/GeorgePearse/ai-backtest/issues)
-- 💬 [GitHub Discussions](https://github.com/GeorgePearse/ai-backtest/discussions)
+- 🐛 [Report Issues](https://github.com/GeorgePearse/retrocode/issues)
+- 💬 [GitHub Discussions](https://github.com/GeorgePearse/retrocode/discussions)

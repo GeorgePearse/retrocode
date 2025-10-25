@@ -388,7 +388,7 @@ Same assertion will compare new output against the snapshot. If they match, test
 
 ```bash
 # Update all snapshots to current output
-ai-backtest run --update-snapshots --tests tests/backtests/
+retrocode run --update-snapshots --tests tests/backtests/
 ```
 
 ### Multiple Fields

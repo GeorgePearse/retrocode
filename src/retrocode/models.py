@@ -1,11 +1,16 @@
 """Data models for the backtesting framework."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field
+
+
+def _utc_now() -> datetime:
+    """Get current UTC time as timezone-aware datetime."""
+    return datetime.now(UTC)
 
 
 class AssertionType(str, Enum):
@@ -80,7 +85,7 @@ class AssertionResult(BaseModel):
     message: str
     score: Optional[float] = None  # For LLM judge results (0-1)
     evidence: Optional[dict[str, Any]] = None  # Supporting data
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)
 
 
 class AgentResponse(BaseModel):
@@ -92,7 +97,7 @@ class AgentResponse(BaseModel):
     generated_code: list[str] = Field(default_factory=list)
     generated_commands: list[str] = Field(default_factory=list)
     model: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)
     instruction_file_path: str
     conversation_trace: list[dict[str, Any]] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -105,7 +110,7 @@ class TestResult(BaseModel):
     agent_response: AgentResponse
     assertion_results: list[AssertionResult]
     passed: bool
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)
     duration_seconds: float
 
     @property
@@ -132,4 +137,4 @@ class ComparisonResult:
     regressions: list[tuple[TestResult, TestResult]]  # (baseline, candidate)
     improvements: list[tuple[TestResult, TestResult]]  # (baseline, candidate)
     score_deltas: dict[str, float]  # Test name -> score change
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=_utc_now)

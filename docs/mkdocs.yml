@@ -1,0 +1,99 @@
+site_name: AI Backtest
+site_description: Test instruction files like CLAUDE.md and AGENTS.md through automated backtesting
+site_author: George Pearse
+site_url: https://github.com/GeorgePearse/ai-backtest
+repo_url: https://github.com/GeorgePearse/ai-backtest
+repo_name: ai-backtest
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+    - content.code.select
+  palette:
+    - scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang: en
+  - mkdocstrings:
+      enabled: !ENV [ENABLE_MKDOCSTRINGS, true]
+      handlers:
+        python:
+          import:
+            - https://docs.python-requests.org/objects.inv
+          options:
+            docstring_style: google
+            show_source: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Installation: installation.md
+  - User Guide:
+    - Writing Tests: guides/writing-tests.md
+    - Assertion Types: guides/assertions.md
+    - Advanced Features: guides/advanced.md
+    - CI/CD Integration: guides/ci-cd.md
+  - Reference:
+    - Python API: reference/api.md
+    - CLI Commands: reference/cli.md
+    - YAML Schema: reference/yaml-schema.md
+  - Examples:
+    - Basic Test: examples/basic-test.md
+    - MCP Testing: examples/mcp-testing.md
+    - Regression Detection: examples/regression-detection.md
+  - Research & Design:
+    - Package Naming: research/naming.md
+    - Inspirations & Patterns: research/inspirations.md
+    - Diff Scoring: research/diff-scoring.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      use_pygments: true
+      line_spans: __span
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - toc:
+      permalink: true
+      toc_depth: "2-3"
+  - admonition
+  - attr_list
+
+extra:
+  version:
+    provider: mike
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_ID

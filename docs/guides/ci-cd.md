@@ -172,7 +172,7 @@ Test against historical PRs:
 
 ```python
 # Extract test cases from historical PRs
-from ai_backtest.parser import YAMLTestParser
+from retrocode.parser import YAMLTestParser
 
 test_suites = YAMLTestParser.parse_directory("tests/backtests")
 
@@ -253,7 +253,7 @@ pytest tests/backtests/ -n 1
 Clear cache for fresh run:
 ```yaml
 - name: Clear cache
-  run: rm -f .ai_backtest_cache.db
+  run: rm -f .retrocode_cache.db
 ```
 
 ## Examples

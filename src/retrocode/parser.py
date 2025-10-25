@@ -5,7 +5,7 @@ from typing import Any
 
 import yaml
 
-from ai_backtest.models import (
+from retrocode.models import (
     Assertion,
     AssertionSeverity,
     AssertionTarget,

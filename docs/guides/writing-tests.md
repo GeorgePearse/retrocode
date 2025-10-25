@@ -382,7 +382,7 @@ ai-backtest list-tests --tests tests/backtests/
 
 LLM judge results are cached. Clear for fresh evaluation:
 ```bash
-rm .ai_backtest_cache.db
+rm .retrocode_cache.db
 pytest tests/backtests/
 ```
 

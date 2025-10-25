@@ -5,7 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from ai_backtest.models import AgentResponse, Assertion, AssertionResult, AssertionType
+from retrocode.models import AgentResponse, Assertion, AssertionResult, AssertionType
 
 
 class CodeAnalyzer(ABC):

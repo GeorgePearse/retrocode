@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from ai_backtest.models import TestResult
+from retrocode.models import TestResult
 
 
 class MarkdownReporter:

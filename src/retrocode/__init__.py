@@ -2,7 +2,7 @@
 
 __version__ = "0.1.0"
 
-from ai_backtest.models import (
+from retrocode.models import (
     AgentResponse,
     Assertion,
     AssertionResult,

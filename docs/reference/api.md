@@ -9,7 +9,7 @@ Use AI Backtest programmatically from Python code.
 Invoke Claude with instruction files.
 
 ```python
-from ai_backtest.agent import AgentInvoker
+from retrocode.agent import AgentInvoker
 
 invoker = AgentInvoker(api_key="sk-ant-...")
 
@@ -30,8 +30,8 @@ print(response.generated_commands)
 Run test suites and collect results.
 
 ```python
-from ai_backtest.runner import TestRunner
-from ai_backtest.parser import YAMLTestParser
+from retrocode.runner import TestRunner
+from retrocode.parser import YAMLTestParser
 
 # Parse tests
 test_suites = YAMLTestParser.parse_directory("tests/backtests")
@@ -49,7 +49,7 @@ result = runner.run_test(test_case, test_suite)
 Parse YAML test files.
 
 ```python
-from ai_backtest.parser import YAMLTestParser
+from retrocode.parser import YAMLTestParser
 
 # Parse single file
 test_suite = YAMLTestParser.parse_file("tests/backtests/test.backtest.yaml")
@@ -71,7 +71,7 @@ for suite in test_suites:
 Evaluate assertions on responses.
 
 ```python
-from ai_backtest.assertions import AssertionRegistry
+from retrocode.assertions import AssertionRegistry
 
 # Evaluate single assertion
 result = AssertionRegistry.evaluate(assertion, response)
@@ -86,7 +86,7 @@ print(f"Score: {result.score}")
 Compare test results across versions.
 
 ```python
-from ai_backtest.comparison import VersionComparator
+from retrocode.comparison import VersionComparator
 
 # Compare results
 comparison = VersionComparator.compare(baseline_results, candidate_results)
@@ -109,7 +109,7 @@ print(f"Score deltas: {comparison.score_deltas}")
 Generate Markdown reports.
 
 ```python
-from ai_backtest.reporting import MarkdownReporter
+from retrocode.reporting import MarkdownReporter
 
 # Generate report
 report = MarkdownReporter.generate(results, title="Test Results")
@@ -124,7 +124,7 @@ MarkdownReporter.save(results, "report.md")
 Generate HTML reports.
 
 ```python
-from ai_backtest.reporting import HTMLReporter
+from retrocode.reporting import HTMLReporter
 
 # Generate report
 html = HTMLReporter.generate(results, title="Test Results")
@@ -138,8 +138,8 @@ HTMLReporter.save(results, "report.html")
 ### Custom Validators
 
 ```python
-from ai_backtest.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
-from ai_backtest.models import AssertionResult
+from retrocode.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
+from retrocode.models import AssertionResult
 
 class CustomValidator(CodeAnalyzer):
     def analyze(self, assertion, response):
@@ -159,7 +159,7 @@ CodeAnalysisRegistry.register("custom", CustomValidator)
 ### LLM Judge Caching
 
 ```python
-from ai_backtest.cache import JudgeCache
+from retrocode.cache import JudgeCache
 
 cache = JudgeCache()
 
@@ -171,7 +171,7 @@ cache.clear()
 
 # Access database
 import sqlite3
-conn = sqlite3.connect('.ai_backtest_cache.db')
+conn = sqlite3.connect('.retrocode_cache.db')
 cursor = conn.cursor()
 cursor.execute("SELECT COUNT(*) FROM judge_cache")
 print(f"Cached entries: {cursor.fetchone()[0]}")
@@ -180,10 +180,10 @@ print(f"Cached entries: {cursor.fetchone()[0]}")
 ## Complete Example
 
 ```python
-from ai_backtest.parser import YAMLTestParser
-from ai_backtest.runner import TestRunner
-from ai_backtest.comparison import VersionComparator
-from ai_backtest.reporting import HTMLReporter, MarkdownReporter
+from retrocode.parser import YAMLTestParser
+from retrocode.runner import TestRunner
+from retrocode.comparison import VersionComparator
+from retrocode.reporting import HTMLReporter, MarkdownReporter
 
 # 1. Parse tests
 test_suites = YAMLTestParser.parse_directory("tests/backtests")

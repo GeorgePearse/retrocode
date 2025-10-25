@@ -6,10 +6,10 @@ from typing import Optional
 
 import click
 
-from ai_backtest.comparison import VersionComparator
-from ai_backtest.parser import YAMLTestParser
-from ai_backtest.reporting import HTMLReporter, MarkdownReporter
-from ai_backtest.runner import TestRunner
+from retrocode.comparison import VersionComparator
+from retrocode.parser import YAMLTestParser
+from retrocode.reporting import HTMLReporter, MarkdownReporter
+from retrocode.runner import TestRunner
 
 
 @click.group()

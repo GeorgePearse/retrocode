@@ -262,7 +262,7 @@ See `tests/backtests/` for complete examples:
 Register custom validators:
 
 ```python
-from ai_backtest.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
+from retrocode.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
 
 class MyValidator(CodeAnalyzer):
     def analyze(self, assertion, response):
@@ -275,9 +275,9 @@ CodeAnalysisRegistry.register("my_validator", MyValidator)
 ### Direct Python Usage
 
 ```python
-from ai_backtest.runner import TestRunner
-from ai_backtest.parser import YAMLTestParser
-from ai_backtest.reporting import HTMLReporter
+from retrocode.runner import TestRunner
+from retrocode.parser import YAMLTestParser
+from retrocode.reporting import HTMLReporter
 
 # Parse tests
 test_suites = YAMLTestParser.parse_directory("tests/backtests")
@@ -297,7 +297,7 @@ HTMLReporter.save(results, "report.html")
 Judge results are cached automatically in SQLite:
 
 ```python
-from ai_backtest.cache import JudgeCache
+from retrocode.cache import JudgeCache
 
 cache = JudgeCache()
 cache.cleanup_expired()  # Remove expired entries

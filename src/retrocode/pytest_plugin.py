@@ -5,8 +5,8 @@ from typing import Any, Generator, Optional
 
 import pytest
 
-from ai_backtest.parser import YAMLTestParser
-from ai_backtest.runner import TestRunner
+from retrocode.parser import YAMLTestParser
+from retrocode.runner import TestRunner
 
 
 def pytest_collect_file(

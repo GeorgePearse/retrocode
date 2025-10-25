@@ -9,20 +9,20 @@ Judge results are automatically cached to save costs and time.
 ### How It Works
 
 - **Cache key:** Hash of (model_under_test, response_text, judge_prompt)
-- **Storage:** SQLite database (`.ai_backtest_cache.db`)
+- **Storage:** SQLite database (`.retrocode_cache.db`)
 - **TTL:** 24 hours by default
 - **Cost:** ~$0.001-0.01 per unique judge call
 
 ### Verify Cache Usage
 
 ```python
-from ai_backtest.cache import JudgeCache
+from retrocode.cache import JudgeCache
 
 cache = JudgeCache()
 
 # Check cache statistics
 import sqlite3
-conn = sqlite3.connect('.ai_backtest_cache.db')
+conn = sqlite3.connect('.retrocode_cache.db')
 cursor = conn.cursor()
 cursor.execute("SELECT COUNT(*) FROM judge_cache")
 cached_calls = cursor.fetchone()[0]
@@ -33,10 +33,10 @@ print(f"Cached judge calls: {cached_calls}")
 
 ```bash
 # Delete cache file
-rm .ai_backtest_cache.db
+rm .retrocode_cache.db
 
 # Or programmatically
-from ai_backtest.cache import JudgeCache
+from retrocode.cache import JudgeCache
 cache = JudgeCache()
 cache.clear()
 ```
@@ -44,7 +44,7 @@ cache.clear()
 ### Adjust Cache TTL
 
 ```python
-from ai_backtest.llm_judge import LLMJudgeEvaluator
+from retrocode.llm_judge import LLMJudgeEvaluator
 
 # Cache entries expire after 7 days
 evaluator = LLMJudgeEvaluator(cache_ttl_hours=7*24)
@@ -64,8 +64,8 @@ Build your own validators for specific requirements.
 ### Create Custom Validator
 
 ```python
-from ai_backtest.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
-from ai_backtest.models import AssertionResult
+from retrocode.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
+from retrocode.models import AssertionResult
 
 class NoPrintDebugAnalyzer(CodeAnalyzer):
     """Prevent print() debugging statements"""
@@ -256,8 +256,8 @@ Extend the framework with domain-specific assertions.
 ### Create Custom Assertion
 
 ```python
-from ai_backtest.assertions import AssertionEvaluator, AssertionRegistry
-from ai_backtest.models import AssertionResult, AssertionType, Assertion, AgentResponse
+from retrocode.assertions import AssertionEvaluator, AssertionRegistry
+from retrocode.models import AssertionResult, AssertionType, Assertion, AgentResponse
 
 class SecurityAnalysisEvaluator(AssertionEvaluator):
     """Check for security issues"""
@@ -312,9 +312,9 @@ Run tests from Python code.
 ### Basic Usage
 
 ```python
-from ai_backtest.parser import YAMLTestParser
-from ai_backtest.runner import TestRunner
-from ai_backtest.reporting import HTMLReporter
+from retrocode.parser import YAMLTestParser
+from retrocode.runner import TestRunner
+from retrocode.reporting import HTMLReporter
 
 # Parse tests
 test_suites = YAMLTestParser.parse_directory("tests/backtests")
@@ -349,7 +349,7 @@ else:
 ### Version Comparison
 
 ```python
-from ai_backtest.comparison import VersionComparator
+from retrocode.comparison import VersionComparator
 
 # Compare two runs
 comparison = VersionComparator.compare(baseline_results, candidate_results)
@@ -367,7 +367,7 @@ else:
 ### Cache Management
 
 ```python
-from ai_backtest.cache import JudgeCache
+from retrocode.cache import JudgeCache
 
 cache = JudgeCache()
 
@@ -411,7 +411,7 @@ pytest tests/backtests/ -m "not llm"
 ## Testing Different Models
 
 ```python
-from ai_backtest.runner import TestRunner
+from retrocode.runner import TestRunner
 
 # Test with Claude 3 Opus (more capable, more expensive)
 runner = TestRunner()

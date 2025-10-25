@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from ai_backtest.models import ComparisonResult, TestResult
+from retrocode.models import ComparisonResult, TestResult
 
 
 class VersionComparator:

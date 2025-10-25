@@ -5,9 +5,9 @@ from typing import Optional
 
 from tqdm import tqdm
 
-from ai_backtest.agent import AgentInvoker
-from ai_backtest.assertions import AssertionRegistry
-from ai_backtest.models import AgentResponse, AssertionSeverity, TestCase, TestResult, TestSuite
+from retrocode.agent import AgentInvoker
+from retrocode.assertions import AssertionRegistry
+from retrocode.models import AgentResponse, AssertionSeverity, TestCase, TestResult, TestSuite
 
 
 class TestRunner:
@@ -80,7 +80,7 @@ class TestRunner:
                 result = AssertionRegistry.evaluate(assertion, agent_response)
                 assertion_results.append(result)
             except Exception as e:
-                from ai_backtest.models import AssertionResult
+                from retrocode.models import AssertionResult
 
                 assertion_results.append(
                     AssertionResult(

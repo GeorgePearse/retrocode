@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from pydantic import ValidationError, validate_call
 
-from ai_backtest.models import (
+from retrocode.models import (
     AgentResponse,
     Assertion,
     AssertionResult,
@@ -231,6 +231,188 @@ class JSONSchemaEvaluator(AssertionEvaluator):
             )
 
 
+class PRMatchEvaluator(AssertionEvaluator):
+    """Evaluates pr_match assertions (comparing against GitHub PR changes)."""
+
+    def evaluate(self, assertion: Assertion, response: AgentResponse) -> AssertionResult:
+        """Compare generated code against a GitHub PR.
+
+        Args:
+            assertion: The assertion with pr_reference in metadata
+            response: The agent response
+
+        Returns:
+            AssertionResult
+        """
+        pr_reference = assertion.metadata.get("pr_reference")
+        if not pr_reference:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message="No pr_reference specified in assertion metadata",
+            )
+
+        match_level = assertion.metadata.get("match_level", "semantic")
+        threshold = assertion.metadata.get("threshold", 0.75)
+
+        try:
+            from retrocode.pr_comparison import PRFetcher
+
+            # Fetch PR data
+            fetcher = PRFetcher()
+            pr_data = fetcher.fetch_pr(pr_reference)
+
+            # Get target content
+            target_content = self._get_check_content(assertion, response)
+
+            # Simple matching: check if any files from PR are mentioned in output
+            # TODO: Implement proper diff matching with configurable match_level
+            matched_files = sum(
+                1 for file in pr_data.files if file.path in target_content
+            )
+            score = matched_files / len(pr_data.files) if pr_data.files else 0.0
+
+            passed = score >= threshold
+
+            return AssertionResult(
+                assertion=assertion,
+                passed=passed,
+                message=f"PR match score: {score*100:.1f}% (threshold: {threshold*100:.0f}%)",
+                score=score,
+                evidence={
+                    "pr_reference": pr_reference,
+                    "matched_files": matched_files,
+                    "total_files": len(pr_data.files),
+                    "match_level": match_level,
+                },
+            )
+        except ValueError as e:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message=f"Failed to fetch PR: {e}",
+                evidence={"error": str(e)},
+            )
+        except Exception as e:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message=f"PR matching error: {e}",
+                evidence={"error": str(e)},
+            )
+
+
+class CodeContainsEvaluator(AssertionEvaluator):
+    """Evaluates code_contains assertions (required code patterns)."""
+
+    def evaluate(self, assertion: Assertion, response: AgentResponse) -> AssertionResult:
+        """Check if required code patterns are present.
+
+        Args:
+            assertion: The assertion with snippet in metadata
+            response: The agent response
+
+        Returns:
+            AssertionResult
+        """
+        snippet = assertion.metadata.get("snippet")
+        if not snippet:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message="No snippet specified in assertion metadata",
+            )
+
+        match_type = assertion.metadata.get("match_type", "exact")
+        language = assertion.metadata.get("language", "python")
+
+        target_content = self._get_check_content(assertion, response)
+
+        try:
+            from retrocode.code_matching import get_matcher
+
+            matcher = get_matcher(language)
+            result = matcher.compare(snippet, target_content, match_type)
+
+            return AssertionResult(
+                assertion=assertion,
+                passed=result.matched,
+                message=f"Code pattern: {result.message}",
+                score=result.score,
+                evidence=result.details or {"match_type": match_type},
+            )
+        except ValueError as e:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message=f"Code matching error: {e}",
+                evidence={"error": str(e)},
+            )
+
+
+class CodeExcludesEvaluator(AssertionEvaluator):
+    """Evaluates code_excludes assertions (forbidden code patterns)."""
+
+    def evaluate(self, assertion: Assertion, response: AgentResponse) -> AssertionResult:
+        """Check that forbidden code patterns are not present.
+
+        Args:
+            assertion: The assertion with patterns in metadata
+            response: The agent response
+
+        Returns:
+            AssertionResult
+        """
+        patterns = assertion.metadata.get("patterns", [])
+        if not patterns:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message="No patterns specified in assertion metadata",
+            )
+
+        # Handle both single pattern (string) and multiple patterns (list)
+        if isinstance(patterns, str):
+            patterns = [patterns]
+
+        match_type = assertion.metadata.get("match_type", "regex")
+        target_content = self._get_check_content(assertion, response)
+
+        try:
+            from retrocode.code_matching import get_matcher
+
+            matcher = get_matcher("python")
+
+            # Check each forbidden pattern
+            found_patterns = []
+            for pattern in patterns:
+                result = matcher.compare(pattern, target_content, match_type)
+                if result.matched:
+                    found_patterns.append(pattern)
+
+            if found_patterns:
+                return AssertionResult(
+                    assertion=assertion,
+                    passed=False,
+                    message=f"Forbidden patterns found: {', '.join(found_patterns)}",
+                    evidence={"forbidden_patterns": found_patterns},
+                )
+
+            return AssertionResult(
+                assertion=assertion,
+                passed=True,
+                message=f"✓ No forbidden patterns found ({len(patterns)} patterns checked)",
+                evidence={"patterns_checked": len(patterns)},
+            )
+        except Exception as e:
+            return AssertionResult(
+                assertion=assertion,
+                passed=False,
+                message=f"Pattern checking error: {e}",
+                evidence={"error": str(e)},
+            )
+
+
 class AssertionRegistry:
     """Registry for assertion evaluators."""
 
@@ -239,6 +421,9 @@ class AssertionRegistry:
         AssertionType.MUST_NOT_CONTAIN: MustNotContainEvaluator,
         AssertionType.REGEX_MATCH: RegexMatchEvaluator,
         AssertionType.JSON_SCHEMA: JSONSchemaEvaluator,
+        AssertionType.PR_MATCH: PRMatchEvaluator,
+        AssertionType.CODE_CONTAINS: CodeContainsEvaluator,
+        AssertionType.CODE_EXCLUDES: CodeExcludesEvaluator,
     }
 
     @classmethod
@@ -259,21 +444,21 @@ class AssertionRegistry:
         """
         # Special handling for LLM judge (lazy import to avoid circular dependency)
         if assertion.type == AssertionType.LLM_JUDGE:
-            from ai_backtest.llm_judge import LLMJudgeEvaluator
+            from retrocode.llm_judge import LLMJudgeEvaluator
 
             evaluator = LLMJudgeEvaluator()
             return evaluator.evaluate(assertion, response)
 
         # Special handling for code analysis
         if assertion.type == AssertionType.CODE_ANALYSIS:
-            from ai_backtest.code_analysis import CodeAnalysisRegistry
+            from retrocode.code_analysis import CodeAnalysisRegistry
 
             validator_name = assertion.metadata.get("validator", "python_type_check")
             return CodeAnalysisRegistry.analyze(validator_name, assertion, response)
 
         # Special handling for snapshots (lazy import)
         if assertion.type == AssertionType.SNAPSHOT:
-            from ai_backtest.snapshots import SnapshotEvaluator
+            from retrocode.snapshots import SnapshotEvaluator
 
             evaluator = SnapshotEvaluator()
             return evaluator.evaluate(assertion, response)

@@ -18,6 +18,9 @@ class AssertionType(str, Enum):
     LLM_JUDGE = "llm_judge"
     CODE_ANALYSIS = "code_analysis"
     SNAPSHOT = "snapshot"
+    PR_MATCH = "pr_match"
+    CODE_CONTAINS = "code_contains"
+    CODE_EXCLUDES = "code_excludes"
 
 
 class AssertionSeverity(str, Enum):

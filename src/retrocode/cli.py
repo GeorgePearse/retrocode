@@ -1,5 +1,6 @@
 """Command-line interface for backtesting."""
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -7,6 +8,7 @@ from typing import Optional
 import click
 
 from retrocode.comparison import VersionComparator
+from retrocode.models import TestResult
 from retrocode.parser import YAMLTestParser
 from retrocode.reporting import HTMLReporter, MarkdownReporter
 from retrocode.runner import TestRunner
@@ -78,9 +80,15 @@ def run(
 
     click.echo(f"\nResults: {passed}/{total} passed, {failed} failed")
 
-    # Save markdown report
-    MarkdownReporter.save(flat_results, output)
-    click.echo(f"Markdown report saved to {output}")
+    # Save results based on extension
+    if output.endswith(".json"):
+        with open(output, "w", encoding="utf-8") as f:
+            json.dump([r.model_dump(mode='json') for r in flat_results], f, indent=2)
+        click.echo(f"JSON results saved to {output}")
+    else:
+        # Save markdown report
+        MarkdownReporter.save(flat_results, output)
+        click.echo(f"Markdown report saved to {output}")
 
     # Save HTML report if requested
     if html:
@@ -115,22 +123,22 @@ def compare(
     output: str,
 ) -> None:
     """Compare two test runs."""
-    import json
-
     click.echo("Comparing baseline and candidate results...")
 
     # Load results
     try:
         with open(baseline, encoding="utf-8") as f:
             baseline_data = json.load(f)
+            baseline_results = [TestResult.model_validate(r) for r in baseline_data]
         with open(candidate, encoding="utf-8") as f:
             candidate_data = json.load(f)
+            candidate_results = [TestResult.model_validate(r) for r in candidate_data]
     except Exception as e:
         click.echo(f"Error loading results: {e}", err=True)
         sys.exit(1)
 
     # Compare
-    comparison = VersionComparator.compare(baseline_data, candidate_data)
+    comparison = VersionComparator.compare(baseline_results, candidate_results)
 
     # Generate report
     report = VersionComparator.regression_report(comparison)

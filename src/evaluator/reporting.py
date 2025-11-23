@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
-from retrocode.models import TestResult
+from evaluator.models import TestResult
 
 
 class MarkdownReporter:

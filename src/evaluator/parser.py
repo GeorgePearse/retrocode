@@ -5,7 +5,7 @@ from typing import Any
 
 import yaml
 
-from retrocode.models import (
+from evaluator.models import (
     Assertion,
     AssertionSeverity,
     AssertionTarget,

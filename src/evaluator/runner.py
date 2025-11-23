@@ -5,9 +5,9 @@ from typing import Optional
 
 from tqdm import tqdm
 
-from retrocode.assertions import AssertionRegistry
-from retrocode.executors import ExecutorBackend, LocalExecutor
-from retrocode.models import AgentResponse, AssertionSeverity, TestCase, TestResult, TestSuite
+from evaluator.assertions import AssertionRegistry
+from evaluator.executors import ExecutorBackend, LocalExecutor
+from evaluator.models import AgentResponse, AssertionSeverity, TestCase, TestResult, TestSuite
 
 
 class TestRunner:
@@ -92,7 +92,7 @@ class TestRunner:
                 result = AssertionRegistry.evaluate(assertion, agent_response)
                 assertion_results.append(result)
             except Exception as e:
-                from retrocode.models import AssertionResult
+                from evaluator.models import AssertionResult
 
                 assertion_results.append(
                     AssertionResult(

@@ -1,6 +1,6 @@
 # Assertion Types Reference
 
-Complete reference for all 10 assertion types supported by retrocode.
+Complete reference for all 10 assertion types supported by evaluator.
 
 ## Overview
 
@@ -388,7 +388,7 @@ Same assertion will compare new output against the snapshot. If they match, test
 
 ```bash
 # Update all snapshots to current output
-retrocode run --update-snapshots --tests tests/backtests/
+evaluator run --update-snapshots --tests tests/backtests/
 ```
 
 ### Multiple Fields
@@ -422,7 +422,7 @@ assertions:
   - type: pr_match
     description: "Should match PR #456 implementation"
     metadata:
-      pr_reference: "GeorgePearse/retrocode#456"
+      pr_reference: "GeorgePearse/evaluator#456"
       match_level: "semantic"
       threshold: 0.75
     severity: error

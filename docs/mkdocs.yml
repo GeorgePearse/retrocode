@@ -1,9 +1,9 @@
-site_name: retrocode
+site_name: evaluator
 site_description: Test instruction files like CLAUDE.md and AGENTS.md through automated backtesting
 site_author: George Pearse
-site_url: https://github.com/GeorgePearse/retrocode
-repo_url: https://github.com/GeorgePearse/retrocode
-repo_name: retrocode
+site_url: https://github.com/GeorgePearse/evaluator
+repo_url: https://github.com/GeorgePearse/evaluator
+repo_name: evaluator
 
 docs_dir: '.'
 site_dir: '../public'

@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from retrocode.models import AgentResponse, TestCase, TestSuite
+from evaluator.models import AgentResponse, TestCase, TestSuite
 
 
 class ExecutionContext(BaseModel):

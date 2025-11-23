@@ -1,8 +1,8 @@
-# retrocode
+# evaluator
 
 Test instruction files like `CLAUDE.md` and `AGENTS.md` through automated backtesting. Validate that AI agent behavior follows your guidelines and detect regressions before deployment.
 
-## Why retrocode?
+## Why evaluator?
 
 When you modify instruction files, you need confidence that:
 
@@ -10,7 +10,7 @@ When you modify instruction files, you need confidence that:
 - ✅ Agent behavior hasn't regressed
 - ✅ New guidelines improve performance
 
-Traditional unit tests don't work for instruction files because outputs are non-deterministic. **retrocode** provides a rigorous framework for testing instruction changes:
+Traditional unit tests don't work for instruction files because outputs are non-deterministic. **evaluator** provides a rigorous framework for testing instruction changes:
 
 ## Key Features
 
@@ -76,10 +76,10 @@ test_cases:
 pytest tests/backtests/
 
 # Via CLI
-retrocode run --tests tests/backtests --html report.html
+evaluator run --tests tests/backtests --html report.html
 
 # List all tests
-retrocode list-tests
+evaluator list-tests
 ```
 
 ## Core Concepts
@@ -134,7 +134,7 @@ Built on proven patterns from:
 
 ## License
 
-MIT - See [LICENSE](https://github.com/GeorgePearse/retrocode/blob/main/LICENSE)
+MIT - See [LICENSE](https://github.com/GeorgePearse/evaluator/blob/main/LICENSE)
 
 ## Contributing
 
@@ -144,4 +144,4 @@ Contributions welcome! Please ensure:
 - Tests cover new functionality
 - Pre-commit hooks pass
 
-See [CONTRIBUTING.md](https://github.com/GeorgePearse/retrocode/blob/main/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/GeorgePearse/evaluator/blob/main/CONTRIBUTING.md)

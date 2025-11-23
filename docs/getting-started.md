@@ -12,8 +12,8 @@ Get up and running with AI Backtest in 5 minutes.
 
 ```bash
 # Clone the repository
-git clone https://github.com/GeorgePearse/retrocode
-cd retrocode
+git clone https://github.com/GeorgePearse/evaluator
+cd evaluator
 
 # Install with uv (recommended)
 uv sync
@@ -72,12 +72,12 @@ pytest tests/backtests/first_test.backtest.yaml -v
 
 **With CLI:**
 ```bash
-retrocode run --tests tests/backtests/first_test.backtest.yaml
+evaluator run --tests tests/backtests/first_test.backtest.yaml
 ```
 
 **With HTML report:**
 ```bash
-retrocode run --tests tests/backtests/ --html report.html
+evaluator run --tests tests/backtests/ --html report.html
 ```
 
 ### 3. Check Results
@@ -207,4 +207,4 @@ tests/backtests/test_my_rules.py
 - Check the [Full Documentation](guides/writing-tests.md)
 - Review [Examples](examples/basic-test.md)
 - Read [Research & Design](research/inspirations.md)
-- Open an issue on [GitHub](https://github.com/GeorgePearse/retrocode/issues)
+- Open an issue on [GitHub](https://github.com/GeorgePearse/evaluator/issues)

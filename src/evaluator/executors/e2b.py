@@ -7,14 +7,14 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-from retrocode.agent import AgentInvoker
-from retrocode.executors.base import (
+from evaluator.agent import AgentInvoker
+from evaluator.executors.base import (
     ExecutionContext,
     ExecutionError,
     ExecutorBackend,
     SandboxConfig,
 )
-from retrocode.models import TestCase, TestSuite
+from evaluator.models import TestCase, TestSuite
 
 
 class SandboxPool:
@@ -44,7 +44,7 @@ class SandboxPool:
             except ImportError:
                 raise ExecutionError(
                     "e2b-code-interpreter not installed. Install with: "
-                    "uv pip install 'retrocode[e2b]'"
+                    "uv pip install 'evaluator[e2b]'"
                 )
         return self._e2b_module
 
@@ -98,7 +98,7 @@ class E2BExecutor(ExecutorBackend):
     """Executor that runs tests in e2b sandboxes for isolation and security."""
 
     # Path to the template mapping cache
-    TEMPLATE_CACHE_PATH = Path(".retrocode/cache/template-mapping.json")
+    TEMPLATE_CACHE_PATH = Path(".evaluator/cache/template-mapping.json")
 
     def __init__(
         self,
@@ -113,12 +113,12 @@ class E2BExecutor(ExecutorBackend):
             api_key: Anthropic API key. If None, uses ANTHROPIC_API_KEY env var.
             max_sessions: Maximum concurrent sandbox sessions
             sandbox_config: Default sandbox configuration
-            cache_dir: Directory for template cache. If None, uses .retrocode/cache
+            cache_dir: Directory for template cache. If None, uses .evaluator/cache
         """
         self.agent = AgentInvoker(api_key=api_key)
         self.pool = SandboxPool(max_sessions=max_sessions)
         self.sandbox_config = sandbox_config or SandboxConfig()
-        self.cache_dir = cache_dir or Path(".retrocode/cache")
+        self.cache_dir = cache_dir or Path(".evaluator/cache")
         self._initialized = False
         self._template_cache: dict = {}
 
@@ -282,7 +282,7 @@ class E2BExecutor(ExecutorBackend):
                 return cached_id
 
             # Build curated template
-            dockerfile_path = Path(".retrocode/environments") / f"{template_name}.Dockerfile"
+            dockerfile_path = Path(".evaluator/environments") / f"{template_name}.Dockerfile"
             if not dockerfile_path.exists():
                 raise ExecutionError(
                     f"Curated template '{template_name}' not found at {dockerfile_path}"
@@ -361,6 +361,40 @@ class E2BExecutor(ExecutorBackend):
         except Exception as e:
             raise ExecutionError(f"Failed to copy instruction files: {str(e)}")
 
+    def _upload_local_code(self, sandbox: Any) -> None:
+        """Upload local evaluator code to sandbox."""
+        import tarfile
+        import io
+
+        # Find source directory
+        # Assuming we are running from root of repo
+        src_path = Path("src/evaluator")
+        if not src_path.exists():
+            # Try to find installed package
+            import evaluator
+
+            if hasattr(evaluator, "__file__") and evaluator.__file__:
+                src_path = Path(evaluator.__file__).parent
+            else:
+                print("Warning: Could not find evaluator source code to upload to sandbox.")
+                return
+
+        # Create tarball in memory
+        f = io.BytesIO()
+        with tarfile.open(fileobj=f, mode="w:gz") as tar:
+            tar.add(src_path, arcname="evaluator")
+
+        f.seek(0)
+        content = f.read()
+
+        # Write to sandbox
+        sandbox.files.write("/tmp/evaluator.tar.gz", content)
+
+        # Extract
+        sandbox.commands.run(
+            "mkdir -p /workspace/pkg && tar -xzf /tmp/evaluator.tar.gz -C /workspace/pkg"
+        )
+
     def execute_test(
         self,
         test_case: TestCase,
@@ -422,12 +456,12 @@ class E2BExecutor(ExecutorBackend):
                     Path(instruction_file), sandbox
                 )
 
-            # Step 5: Install retrocode in sandbox and run agent
-            # First, ensure retrocode is available in the sandbox
-            install_result = sandbox.commands.run(
-                "pip install retrocode anthropic --quiet",
-                timeout=120,
-            )
+            # Step 5: Install dependencies and upload code
+            # Install dependencies
+            sandbox.commands.run("pip install anthropic pydantic pyyaml --quiet", timeout=120)
+
+            # Upload local code
+            self._upload_local_code(sandbox)
 
             # Create a Python script to run the agent and capture output
             agent_script = self._create_agent_script(
@@ -519,13 +553,16 @@ import json
 import os
 import sys
 
+# Add uploaded package to path
+sys.path.append("/workspace/pkg")
+
 # Ensure ANTHROPIC_API_KEY is available
 api_key = os.getenv("ANTHROPIC_API_KEY")
 if not api_key:
     print(json.dumps({{"error": "ANTHROPIC_API_KEY not set"}}))
     sys.exit(1)
 
-from retrocode.agent import AgentInvoker
+from evaluator.agent import AgentInvoker
 
 try:
     agent = AgentInvoker(api_key=api_key)
@@ -574,7 +611,7 @@ except Exception as e:
         Returns:
             AgentResponse parsed from output
         """
-        from retrocode.models import AgentResponse
+        from evaluator.models import AgentResponse
 
         try:
             # Extract JSON output between markers

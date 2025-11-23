@@ -11,10 +11,10 @@ Run your backtest agents in isolated cloud sandboxes using [E2B](https://e2b.dev
 
 ## Installation
 
-Install retrocode with E2B support:
+Install evaluator with E2B support:
 
 ```bash
-uv pip install 'retrocode[e2b]'
+uv pip install 'evaluator[e2b]'
 ```
 
 You'll also need an E2B API key. Get one at [e2b.dev](https://e2b.dev) and set it:
@@ -28,13 +28,13 @@ export E2B_API_KEY="your-e2b-api-key"
 Run tests in an E2B sandbox:
 
 ```bash
-retrocode run --tests tests/backtests/ --executor e2b
+evaluator run --tests tests/backtests/ --executor e2b
 ```
 
 Use a specific template:
 
 ```bash
-retrocode run --tests tests/backtests/ --executor e2b --e2b-template claude-tools
+evaluator run --tests tests/backtests/ --executor e2b --e2b-template claude-tools
 ```
 
 ## Available Templates
@@ -49,7 +49,7 @@ Minimal Python 3.11 environment with:
 Best for: Simple tests that don't require CLI tools.
 
 ```bash
-retrocode run --executor e2b --e2b-template base
+evaluator run --executor e2b --e2b-template base
 ```
 
 ### claude-tools
@@ -66,7 +66,7 @@ Full environment with all CLI tools referenced in CLAUDE.md:
 Best for: Tests that exercise file search and manipulation behaviors.
 
 ```bash
-retrocode run --executor e2b --e2b-template claude-tools
+evaluator run --executor e2b --e2b-template claude-tools
 ```
 
 ## Configuration in YAML
@@ -128,12 +128,12 @@ CMD ["/bin/bash"]
 
 ### Template Caching
 
-Custom Dockerfiles are cached by content hash. If you modify the Dockerfile, retrocode automatically rebuilds the template. The cache is stored in `.retrocode/cache/template-mapping.json`.
+Custom Dockerfiles are cached by content hash. If you modify the Dockerfile, evaluator automatically rebuilds the template. The cache is stored in `.evaluator/cache/template-mapping.json`.
 
 To clear the cache:
 
 ```bash
-rm -rf .retrocode/cache/
+rm -rf .evaluator/cache/
 ```
 
 ## Environment Variables
@@ -159,7 +159,7 @@ Or via CLI for all tests:
 
 ```bash
 export MY_VAR="value"
-retrocode run --executor e2b
+evaluator run --executor e2b
 ```
 
 ## Resource Limits
@@ -178,10 +178,10 @@ metadata:
 Use E2B executor directly in Python:
 
 ```python
-from retrocode.executors import E2BExecutor
-from retrocode.executors.base import SandboxConfig
-from retrocode.runner import TestRunner
-from retrocode.parser import YAMLTestParser
+from evaluator.executors import E2BExecutor
+from evaluator.executors.base import SandboxConfig
+from evaluator.runner import TestRunner
+from evaluator.parser import YAMLTestParser
 
 # Configure sandbox
 config = SandboxConfig(
@@ -203,8 +203,8 @@ results = runner.run_suites(test_suites)
 
 ```python
 from pathlib import Path
-from retrocode.executors import E2BExecutor
-from retrocode.executors.base import SandboxConfig
+from evaluator.executors import E2BExecutor
+from evaluator.executors.base import SandboxConfig
 
 # Use custom Dockerfile
 config = SandboxConfig(
@@ -241,14 +241,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install 'retrocode[e2b]'
+          pip install 'evaluator[e2b]'
 
       - name: Run backtests in sandbox
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
         run: |
-          retrocode run \
+          evaluator run \
             --tests tests/backtests/ \
             --executor e2b \
             --e2b-template claude-tools \

@@ -5,8 +5,8 @@ from typing import Any, Optional
 
 from anthropic import Anthropic
 
-from retrocode.cache import JudgeCache
-from retrocode.models import AgentResponse, Assertion, AssertionResult, AssertionType
+from evaluator.cache import JudgeCache
+from evaluator.models import AgentResponse, Assertion, AssertionResult, AssertionType
 
 
 class LLMJudgeEvaluator:

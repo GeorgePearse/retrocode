@@ -2,7 +2,7 @@
 
 __version__ = "0.1.0"
 
-from retrocode.models import (
+from evaluator.models import (
     AgentResponse,
     Assertion,
     AssertionResult,

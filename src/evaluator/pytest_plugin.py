@@ -5,8 +5,8 @@ from typing import Any, Generator, Optional
 
 import pytest
 
-from retrocode.parser import YAMLTestParser
-from retrocode.runner import TestRunner
+from evaluator.parser import YAMLTestParser
+from evaluator.runner import TestRunner
 
 
 def pytest_collect_file(file_path: Path, parent: Any) -> Optional["BacktestFile"]:

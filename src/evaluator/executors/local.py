@@ -3,9 +3,9 @@
 import time
 from typing import Optional
 
-from retrocode.agent import AgentInvoker
-from retrocode.executors.base import ExecutionContext, ExecutorBackend
-from retrocode.models import TestCase, TestSuite
+from evaluator.agent import AgentInvoker
+from evaluator.executors.base import ExecutionContext, ExecutorBackend
+from evaluator.models import TestCase, TestSuite
 
 
 class LocalExecutor(ExecutorBackend):

@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 import pytest
 
-from retrocode.executors.base import ExecutionError
-from retrocode.executors.e2b import E2BExecutor
+from evaluator.executors.base import ExecutionError
+from evaluator.executors.e2b import E2BExecutor
 
 
 class TestE2BExecutorTemplateBuilding:
@@ -47,7 +47,7 @@ RUN cargo install ripgrep
     @pytest.fixture
     def executor(self, temp_cache_dir):
         """Create an E2BExecutor with temporary cache."""
-        with patch("retrocode.executors.e2b.AgentInvoker"):
+        with patch("evaluator.executors.e2b.AgentInvoker"):
             executor = E2BExecutor(cache_dir=temp_cache_dir)
             yield executor
 
@@ -171,7 +171,7 @@ RUN cargo install ripgrep
             "curated_templates": {
                 "base": {
                     "template_id": None,
-                    "dockerfile": ".retrocode/environments/base.Dockerfile",
+                    "dockerfile": ".evaluator/environments/base.Dockerfile",
                 },
             },
             "custom_templates": {},
@@ -235,12 +235,12 @@ RUN cargo install ripgrep
 
     def test_build_or_get_template_curated_not_cached(self, executor, temp_env_dir, monkeypatch):
         """Test _build_or_get_template builds uncached curated template."""
-        # Change to temp environment directory parent so .retrocode/environments path exists
+        # Change to temp environment directory parent so .evaluator/environments path exists
         env_parent = temp_env_dir.parent
         monkeypatch.chdir(env_parent)
 
-        # Create .retrocode/environments structure in current directory
-        env_dir = Path(".retrocode/environments")
+        # Create .evaluator/environments structure in current directory
+        env_dir = Path(".evaluator/environments")
         env_dir.mkdir(parents=True, exist_ok=True)
         base_dockerfile = env_dir / "base.Dockerfile"
         base_dockerfile.write_text("FROM python:3.11-slim\nRUN pip install anthropic\n")
@@ -248,7 +248,7 @@ RUN cargo install ripgrep
         executor._template_cache = {
             "curated_templates": {
                 "base": {
-                    "dockerfile": ".retrocode/environments/base.Dockerfile",
+                    "dockerfile": ".evaluator/environments/base.Dockerfile",
                     "template_id": None,
                 },
             },
@@ -365,7 +365,7 @@ class TestE2BExecutorCaching:
         """Test that template cache persists across executor instances."""
         monkeypatch.chdir(temp_env_dir.parent)
 
-        with patch("retrocode.executors.e2b.AgentInvoker"):
+        with patch("evaluator.executors.e2b.AgentInvoker"):
             # First executor builds template
             executor1 = E2BExecutor(cache_dir=temp_cache_dir)
             executor1._template_cache = {
@@ -392,7 +392,7 @@ class TestE2BExecutorCaching:
             "FROM python:3.11\nRUN pip install anthropic\nRUN pip install pydantic\n"
         )
 
-        with patch("retrocode.executors.e2b.AgentInvoker"):
+        with patch("evaluator.executors.e2b.AgentInvoker"):
             executor = E2BExecutor(cache_dir=temp_cache_dir)
 
             with patch.object(executor.pool, "_get_e2b_module"):

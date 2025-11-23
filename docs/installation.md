@@ -1,6 +1,6 @@
 # Installation
 
-Complete installation guide for retrocode.
+Complete installation guide for evaluator.
 
 ## System Requirements
 
@@ -19,8 +19,8 @@ The fastest and most reliable installation:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone and setup
-git clone https://github.com/GeorgePearse/retrocode
-cd retrocode
+git clone https://github.com/GeorgePearse/evaluator
+cd evaluator
 uv sync
 ```
 
@@ -36,8 +36,8 @@ source .venv/bin/activate
 ### Method 2: Using pip
 
 ```bash
-git clone https://github.com/GeorgePearse/retrocode
-cd retrocode
+git clone https://github.com/GeorgePearse/evaluator
+cd evaluator
 pip install -e .
 ```
 
@@ -46,8 +46,8 @@ pip install -e .
 For contributing to the project:
 
 ```bash
-git clone https://github.com/GeorgePearse/retrocode
-cd retrocode
+git clone https://github.com/GeorgePearse/evaluator
+cd evaluator
 
 # With uv
 uv sync --all-extras
@@ -63,8 +63,8 @@ pip install -e ".[dev,docs]"
 python --version
 # Should be 3.10+
 
-# Check retrocode is installed
-retrocode --help
+# Check evaluator is installed
+evaluator --help
 
 # Run tests (should pass)
 pytest tests/
@@ -127,7 +127,7 @@ set +a
 
 Some commands accept the API key directly:
 ```bash
-retrocode run --api-key "sk-ant-..." --tests tests/backtests/
+evaluator run --api-key "sk-ant-..." --tests tests/backtests/
 ```
 
 ### Verify Setup
@@ -155,7 +155,7 @@ Run tests in isolated cloud sandboxes with [E2B](https://e2b.dev):
 
 ```bash
 # With uv
-uv pip install 'retrocode[e2b]'
+uv pip install 'evaluator[e2b]'
 
 # With pip
 pip install -e ".[e2b]"
@@ -174,7 +174,7 @@ export E2B_API_KEY="your-e2b-api-key"
 Then run tests in the sandbox:
 
 ```bash
-retrocode run --tests tests/backtests/ --executor e2b
+evaluator run --tests tests/backtests/ --executor e2b
 ```
 
 See [Sandbox Execution](guides/sandbox.md) for full documentation.
@@ -228,7 +228,7 @@ pip install -e ".[dev,docs,e2b]"
 
 ## Troubleshooting
 
-### "command not found: retrocode"
+### "command not found: evaluator"
 
 The CLI wasn't installed properly. Try:
 
@@ -237,7 +237,7 @@ The CLI wasn't installed properly. Try:
 source .venv/bin/activate
 
 # If using pip in virtualenv
-which retrocode
+which evaluator
 # Should show path to executable
 
 # If not found, reinstall
@@ -305,5 +305,5 @@ Once installed:
 ## Getting Help
 
 - 📚 [Full Documentation](index.md)
-- 🐛 [Report Issues](https://github.com/GeorgePearse/retrocode/issues)
-- 💬 [GitHub Discussions](https://github.com/GeorgePearse/retrocode/discussions)
+- 🐛 [Report Issues](https://github.com/GeorgePearse/evaluator/issues)
+- 💬 [GitHub Discussions](https://github.com/GeorgePearse/evaluator/discussions)

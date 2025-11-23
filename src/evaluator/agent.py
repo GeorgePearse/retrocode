@@ -6,7 +6,7 @@ from typing import Optional
 
 from anthropic import Anthropic
 
-from retrocode.models import AgentResponse
+from evaluator.models import AgentResponse
 
 
 class AgentInvoker:

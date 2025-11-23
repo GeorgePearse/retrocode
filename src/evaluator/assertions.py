@@ -4,7 +4,7 @@ import json
 import re
 from abc import ABC, abstractmethod
 
-from retrocode.models import (
+from evaluator.models import (
     AgentResponse,
     Assertion,
     AssertionResult,
@@ -254,7 +254,7 @@ class CodeContainsEvaluator(AssertionEvaluator):
         target_content = self._get_check_content(assertion, response)
 
         try:
-            from retrocode.code_matching import get_matcher
+            from evaluator.code_matching import get_matcher
 
             matcher = get_matcher(language)
             result = matcher.compare(snippet, target_content, match_type)
@@ -304,7 +304,7 @@ class CodeExcludesEvaluator(AssertionEvaluator):
         target_content = self._get_check_content(assertion, response)
 
         try:
-            from retrocode.code_matching import get_matcher
+            from evaluator.code_matching import get_matcher
 
             matcher = get_matcher("python")
 
@@ -366,21 +366,21 @@ class AssertionRegistry:
         """
         # Special handling for LLM judge (lazy import to avoid circular dependency)
         if assertion.type == AssertionType.LLM_JUDGE:
-            from retrocode.llm_judge import LLMJudgeEvaluator
+            from evaluator.llm_judge import LLMJudgeEvaluator
 
             evaluator = LLMJudgeEvaluator()
             return evaluator.evaluate(assertion, response)
 
         # Special handling for code analysis
         if assertion.type == AssertionType.CODE_ANALYSIS:
-            from retrocode.code_analysis import CodeAnalysisRegistry
+            from evaluator.code_analysis import CodeAnalysisRegistry
 
             validator_name = assertion.metadata.get("validator", "python_type_check")
             return CodeAnalysisRegistry.analyze(validator_name, assertion, response)
 
         # Special handling for snapshots (lazy import)
         if assertion.type == AssertionType.SNAPSHOT:
-            from retrocode.snapshots import SnapshotEvaluator
+            from evaluator.snapshots import SnapshotEvaluator
 
             evaluator = SnapshotEvaluator()
             return evaluator.evaluate(assertion, response)

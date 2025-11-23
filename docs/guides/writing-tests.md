@@ -265,7 +265,7 @@ pytest tests/backtests/ -x
 
 ### Use CLI
 ```bash
-retrocode run --tests tests/backtests/ --html report.html
+evaluator run --tests tests/backtests/ --html report.html
 ```
 
 ## Validating Your Tests
@@ -280,7 +280,7 @@ python -c "import yaml; yaml.safe_load(open('tests/backtests/test.backtest.yaml'
 pytest tests/backtests/ -vv
 
 # Check coverage
-retrocode list-tests
+evaluator list-tests
 # Review all discovered tests
 ```
 
@@ -373,16 +373,16 @@ pytest tests/backtests/test.backtest.yaml -s
 
 ### Check What Was Tested
 
-Use `retrocode list-tests`:
+Use `evaluator list-tests`:
 ```bash
-retrocode list-tests --tests tests/backtests/
+evaluator list-tests --tests tests/backtests/
 ```
 
 ### Re-run with Cache Cleared
 
 LLM judge results are cached. Clear for fresh evaluation:
 ```bash
-rm .retrocode_cache.db
+rm .evaluator_cache.db
 pytest tests/backtests/
 ```
 

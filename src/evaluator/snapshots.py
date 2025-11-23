@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from retrocode.models import AgentResponse, Assertion, AssertionResult
+from evaluator.models import AgentResponse, Assertion, AssertionResult
 
 
 class SnapshotManager:

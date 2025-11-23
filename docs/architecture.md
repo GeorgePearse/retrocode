@@ -23,15 +23,15 @@ graph TD
 ### 1. Test Definition (YAML)
 Tests are defined in declarative YAML files.
 - **Location**: `tests/backtests/*.backtest.yaml`
-- **Schema**: Defined in `retrocode.models.TestSuite` and `TestCase`
+- **Schema**: Defined in `evaluator.models.TestSuite` and `TestCase`
 
-### 2. Parser (`retrocode.parser`)
+### 2. Parser (`evaluator.parser`)
 - **Responsibility**: validating and loading YAML files into Pydantic models.
 - **Features**: 
   - Validates schema structure
   - Resolves file paths (e.g., instruction files)
 
-### 3. Executors (`retrocode.executors`)
+### 3. Executors (`evaluator.executors`)
 The executor is responsible for running the agent code in a specific environment.
 
 #### Local Executor (`LocalExecutor`)
@@ -49,7 +49,7 @@ The executor is responsible for running the agent code in a specific environment
   5. **Output**: Captures structured JSON output from the sandbox.
 - **Pros**: Full isolation, reproducible environment, security.
 
-### 4. Agent Invoker (`retrocode.agent`)
+### 4. Agent Invoker (`evaluator.agent`)
 - Wraps the LLM interaction (currently Anthropic Claude).
 - Constructs the prompt with:
   - System prompt (from instruction file)
@@ -60,7 +60,7 @@ The executor is responsible for running the agent code in a specific environment
   - Tool calls
   - Generated shell commands
 
-### 5. Assertions (`retrocode.assertions`)
+### 5. Assertions (`evaluator.assertions`)
 Evaluators check the `AgentResponse` against defined rules.
 
 | Type | Evaluator Class | Description |
@@ -74,14 +74,14 @@ Evaluators check the `AgentResponse` against defined rules.
 | `llm_judge` | `LLMJudgeEvaluator` | Uses an LLM to evaluate complex criteria |
 | `snapshot` | `SnapshotEvaluator` | Compares output against saved snapshot |
 
-### 6. Reporting (`retrocode.reporting`)
+### 6. Reporting (`evaluator.reporting`)
 Generates human-readable reports from `TestResult` objects.
 - **Markdown**: For CLI output and simple logs.
 - **HTML**: For detailed, interactive reports.
 
 ## Data Flow
 
-1. **CLI** (`retrocode.cli`) receives command to run tests.
+1. **CLI** (`evaluator.cli`) receives command to run tests.
 2. **Parser** reads YAML files and creates `TestSuite` objects.
 3. **TestRunner** iterates through test cases.
 4. **Executor** runs the agent for each test case:

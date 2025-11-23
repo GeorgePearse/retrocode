@@ -25,12 +25,12 @@ Organizing potential names for the AI configuration backtesting framework.
   - Badge: `codetest: 98% quality maintained`
 - **Weaknesses:** Very generic, might get lost in search
 
-### retrocode
-- **Import:** `import retrocode as rc`
+### evaluator
+- **Import:** `import evaluator as rc`
 - **Philosophy:** "Retro" implies retrospective testing and historical PR analysis
 - **Strengths:**
   - Modern sounding despite "retro"
-  - Good verb form: "Let's retrocode this change"
+  - Good verb form: "Let's evaluator this change"
   - Hints at historical analysis
   - Memorable and unique
 - **Weaknesses:** Slightly cryptic for newcomers

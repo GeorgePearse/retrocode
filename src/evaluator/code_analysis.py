@@ -4,7 +4,7 @@ import ast
 import re
 from abc import ABC, abstractmethod
 
-from retrocode.models import AgentResponse, Assertion, AssertionResult
+from evaluator.models import AgentResponse, Assertion, AssertionResult
 
 
 class CodeAnalyzer(ABC):

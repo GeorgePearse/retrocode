@@ -9,20 +9,20 @@ Judge results are automatically cached to save costs and time.
 ### How It Works
 
 - **Cache key:** Hash of (model_under_test, response_text, judge_prompt)
-- **Storage:** SQLite database (`.retrocode_cache.db`)
+- **Storage:** SQLite database (`.evaluator_cache.db`)
 - **TTL:** 24 hours by default
 - **Cost:** ~$0.001-0.01 per unique judge call
 
 ### Verify Cache Usage
 
 ```python
-from retrocode.cache import JudgeCache
+from evaluator.cache import JudgeCache
 
 cache = JudgeCache()
 
 # Check cache statistics
 import sqlite3
-conn = sqlite3.connect('.retrocode_cache.db')
+conn = sqlite3.connect('.evaluator_cache.db')
 cursor = conn.cursor()
 cursor.execute("SELECT COUNT(*) FROM judge_cache")
 cached_calls = cursor.fetchone()[0]
@@ -33,10 +33,10 @@ print(f"Cached judge calls: {cached_calls}")
 
 ```bash
 # Delete cache file
-rm .retrocode_cache.db
+rm .evaluator_cache.db
 
 # Or programmatically
-from retrocode.cache import JudgeCache
+from evaluator.cache import JudgeCache
 cache = JudgeCache()
 cache.clear()
 ```
@@ -44,7 +44,7 @@ cache.clear()
 ### Adjust Cache TTL
 
 ```python
-from retrocode.llm_judge import LLMJudgeEvaluator
+from evaluator.llm_judge import LLMJudgeEvaluator
 
 # Cache entries expire after 7 days
 evaluator = LLMJudgeEvaluator(cache_ttl_hours=7*24)
@@ -64,8 +64,8 @@ Build your own validators for specific requirements.
 ### Create Custom Validator
 
 ```python
-from retrocode.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
-from retrocode.models import AssertionResult
+from evaluator.code_analysis import CodeAnalyzer, CodeAnalysisRegistry
+from evaluator.models import AssertionResult
 
 class NoPrintDebugAnalyzer(CodeAnalyzer):
     """Prevent print() debugging statements"""
@@ -134,7 +134,7 @@ After reviewing changes, update:
 
 ```bash
 # Update all snapshots
-retrocode run --tests tests/backtests/ --update-snapshots
+evaluator run --tests tests/backtests/ --update-snapshots
 
 # Or via pytest
 pytest tests/backtests/ --snapshot-update
@@ -174,15 +174,15 @@ Detect regressions across instruction changes.
 
 ```bash
 # Create baseline (current main branch)
-retrocode run --tests tests/backtests/ --output baseline.json
+evaluator run --tests tests/backtests/ --output baseline.json
 
 # Edit CLAUDE.md or AGENTS.md...
 
 # Create candidate (with your changes)
-retrocode run --tests tests/backtests/ --output candidate.json
+evaluator run --tests tests/backtests/ --output candidate.json
 
 # Compare
-retrocode compare --baseline baseline.json --candidate candidate.json
+evaluator compare --baseline baseline.json --candidate candidate.json
 ```
 
 ### Regression Report
@@ -197,7 +197,7 @@ Shows:
 
 ```yaml
 - name: Compare versions
-  run: retrocode compare --baseline baseline.json --candidate candidate.json
+  run: evaluator compare --baseline baseline.json --candidate candidate.json
 ```
 
 ## Custom LLM Judge Prompts
@@ -256,8 +256,8 @@ Extend the framework with domain-specific assertions.
 ### Create Custom Assertion
 
 ```python
-from retrocode.assertions import AssertionEvaluator, AssertionRegistry
-from retrocode.models import AssertionResult, AssertionType, Assertion, AgentResponse
+from evaluator.assertions import AssertionEvaluator, AssertionRegistry
+from evaluator.models import AssertionResult, AssertionType, Assertion, AgentResponse
 
 class SecurityAnalysisEvaluator(AssertionEvaluator):
     """Check for security issues"""
@@ -312,9 +312,9 @@ Run tests from Python code.
 ### Basic Usage
 
 ```python
-from retrocode.parser import YAMLTestParser
-from retrocode.runner import TestRunner
-from retrocode.reporting import HTMLReporter
+from evaluator.parser import YAMLTestParser
+from evaluator.runner import TestRunner
+from evaluator.reporting import HTMLReporter
 
 # Parse tests
 test_suites = YAMLTestParser.parse_directory("tests/backtests")
@@ -349,7 +349,7 @@ else:
 ### Version Comparison
 
 ```python
-from retrocode.comparison import VersionComparator
+from evaluator.comparison import VersionComparator
 
 # Compare two runs
 comparison = VersionComparator.compare(baseline_results, candidate_results)
@@ -367,7 +367,7 @@ else:
 ### Cache Management
 
 ```python
-from retrocode.cache import JudgeCache
+from evaluator.cache import JudgeCache
 
 cache = JudgeCache()
 
@@ -411,7 +411,7 @@ pytest tests/backtests/ -m "not llm"
 ## Testing Different Models
 
 ```python
-from retrocode.runner import TestRunner
+from evaluator.runner import TestRunner
 
 # Test with Claude 3 Opus (more capable, more expensive)
 runner = TestRunner()
@@ -455,10 +455,10 @@ For isolated, reproducible test execution, use E2B cloud sandboxes:
 
 ```bash
 # Run tests in isolated sandbox
-retrocode run --tests tests/backtests/ --executor e2b
+evaluator run --tests tests/backtests/ --executor e2b
 
 # Use a template with CLI tools
-retrocode run --executor e2b --e2b-template claude-tools
+evaluator run --executor e2b --e2b-template claude-tools
 ```
 
 See [Sandbox Execution](sandbox.md) for full documentation on E2B integration.

@@ -2,13 +2,13 @@
 
 import pytest
 
-from retrocode.assertions import (
+from evaluator.assertions import (
     AssertionRegistry,
     CodeContainsEvaluator,
     CodeExcludesEvaluator,
 )
-from retrocode.code_matching import PythonASTMatcher, get_matcher
-from retrocode.models import (
+from evaluator.code_matching import PythonASTMatcher, get_matcher
+from evaluator.models import (
     AgentResponse,
     Assertion,
     AssertionTarget,

@@ -45,7 +45,7 @@ class CacheEntry(Base):
 class JudgeCache:
     """SQLite cache for LLM judge results."""
 
-    def __init__(self, db_path: str = ".retrocode_cache.db") -> None:
+    def __init__(self, db_path: str = ".evaluator_cache.db") -> None:
         """Initialize cache.
 
         Args:

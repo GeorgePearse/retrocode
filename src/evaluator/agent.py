@@ -38,7 +38,7 @@ class AgentInvoker:
     def invoke(
         self,
         task: str,
-        instruction_file_path: str,
+        instruction_file_path: Optional[str] = None,
         model: str = "claude-3-5-sonnet-20250109",
         max_tokens: int = 4096,
     ) -> AgentResponse:
@@ -46,14 +46,17 @@ class AgentInvoker:
 
         Args:
             task: The task to perform
-            instruction_file_path: Path to instruction file
+            instruction_file_path: Path to instruction file (optional)
             model: Claude model to use
             max_tokens: Maximum tokens in response
 
         Returns:
             AgentResponse with full response and extracted components
         """
-        instructions = self.load_instructions(instruction_file_path)
+        if instruction_file_path:
+            instructions = self.load_instructions(instruction_file_path)
+        else:
+            instructions = ""
 
         conversation_trace: list[dict[str, str]] = []
 
@@ -84,7 +87,7 @@ Respond to the user's request while adhering to these guidelines."""
             task=task,
             full_response=full_response,
             model=model,
-            instruction_file_path=str(Path(instruction_file_path).absolute()),
+            instruction_file_path=str(Path(instruction_file_path).absolute()) if instruction_file_path else "",
             conversation_trace=conversation_trace,
             tool_calls=self._extract_tool_calls(full_response),
             generated_code=self._extract_code_blocks(full_response),

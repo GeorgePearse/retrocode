@@ -12,7 +12,7 @@ from evaluator.models import AgentResponse, TestCase, TestSuite
 class ExecutionContext(BaseModel):
     """Complete context from test execution including outputs and metrics."""
 
-    agent_response: AgentResponse
+    agent_response: Optional[AgentResponse] = None
     stdout: str = ""
     stderr: str = ""
     exit_code: int = 0

@@ -122,6 +122,7 @@ Built on proven patterns from:
 - **DSPy** (Assertion framework, optimization)
 - **Evidently** (LLM evaluation in CI/CD)
 - **HumanEval** (Pass@k metrics)
+- **SWE-bench** (Evaluation methodology)
 
 ## Next Steps
 

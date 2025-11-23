@@ -5,7 +5,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from retrocode.agent import AgentInvoker
 from retrocode.executors.base import (
@@ -27,36 +27,52 @@ class SandboxPool:
             max_sessions: Maximum number of concurrent sandbox sessions
         """
         self.max_sessions = max_sessions
-        self.available_sessions: list[str] = []
-        self.active_sessions: set[str] = set()
+        self.available_sandboxes: list[Any] = []  # List of e2b Sandbox instances
+        self.active_sandboxes: dict[str, Any] = {}  # session_id -> Sandbox
         # Import deferred to handle missing e2b gracefully
         self._e2b_module = None
+        self._sandbox_class = None
 
-    def _get_e2b_module(self):
+    def _get_e2b_module(self) -> Any:
         """Lazily import e2b module."""
         if self._e2b_module is None:
             try:
-                import e2b  # type: ignore[import-not-found]
+                import e2b_code_interpreter  # type: ignore[import-not-found]
 
-                self._e2b_module = e2b
+                self._e2b_module = e2b_code_interpreter
+                self._sandbox_class = e2b_code_interpreter.Sandbox
             except ImportError:
-                raise ExecutionError("e2b not installed. Install with: uv pip install e2b")
+                raise ExecutionError(
+                    "e2b-code-interpreter not installed. Install with: "
+                    "uv pip install 'retrocode[e2b]'"
+                )
         return self._e2b_module
 
-    def acquire(self, config: SandboxConfig) -> str:
+    def acquire(
+        self,
+        config: SandboxConfig,
+        template_id: Optional[str] = None,
+    ) -> tuple[str, Any]:
         """Acquire a sandbox session.
 
         Args:
             config: Sandbox configuration
+            template_id: Optional template ID to use
 
         Returns:
-            Sandbox session ID
+            Tuple of (session_id, sandbox_instance)
         """
-        # For now, return a placeholder
-        # Full implementation would create/reuse e2b sandboxes
-        session_id = f"sandbox-{int(time.time() * 1000)}"
-        self.active_sessions.add(session_id)
-        return session_id
+        self._get_e2b_module()
+
+        # Create new sandbox with the specified template
+        sandbox = self._sandbox_class(
+            template=template_id,
+            timeout=config.timeout_seconds,
+        )
+
+        session_id = sandbox.sandbox_id
+        self.active_sandboxes[session_id] = sandbox
+        return session_id, sandbox
 
     def release(self, session_id: str) -> None:
         """Release a sandbox session back to the pool.
@@ -64,14 +80,18 @@ class SandboxPool:
         Args:
             session_id: Sandbox session ID
         """
-        if session_id in self.active_sessions:
-            self.active_sessions.remove(session_id)
-            self.available_sessions.append(session_id)
+        if session_id in self.active_sandboxes:
+            sandbox = self.active_sandboxes.pop(session_id)
+            try:
+                sandbox.kill()
+            except Exception:
+                pass  # Sandbox may already be terminated
 
     def shutdown(self) -> None:
         """Shutdown all sandbox sessions."""
-        self.available_sessions.clear()
-        self.active_sessions.clear()
+        for session_id in list(self.active_sandboxes.keys()):
+            self.release(session_id)
+        self.available_sandboxes.clear()
 
 
 class E2BExecutor(ExecutorBackend):
@@ -289,38 +309,38 @@ class E2BExecutor(ExecutorBackend):
 
         raise ExecutionError("Either dockerfile_path or template_name must be provided")
 
-    def _inject_environment_vars(self, env_vars: dict, sandbox_session_id: str) -> None:
+    def _inject_environment_vars(self, env_vars: dict, sandbox: Any) -> None:
         """Inject environment variables into a sandbox session.
 
         Args:
             env_vars: Dictionary of environment variables to inject
-            sandbox_session_id: ID of the sandbox session
+            sandbox: The e2b sandbox instance
 
         Raises:
             ExecutionError: If injection fails
         """
         try:
-            # TODO: Implement actual e2b environment variable injection
-            # This would involve using the e2b SDK to set env vars in the running sandbox
-            # For now, just validate the input
             if not isinstance(env_vars, dict):
                 raise ExecutionError("Environment variables must be a dictionary")
 
-            # Example of what the actual implementation would do:
-            # e2b = self.pool._get_e2b_module()
-            # session = e2b.Sandbox(sandbox_id=sandbox_session_id)
-            # for key, value in env_vars.items():
-            #     session.run_command(f"export {key}={value}")
+            # Create export commands for each environment variable
+            if env_vars:
+                export_commands = [f'export {key}="{value}"' for key, value in env_vars.items()]
+                export_script = " && ".join(export_commands)
+                sandbox.commands.run(export_script)
 
         except Exception as e:
             raise ExecutionError(f"Failed to inject environment variables: {str(e)}")
 
-    def _copy_instruction_files(self, instruction_file_path: Path, sandbox_session_id: str) -> None:
+    def _copy_instruction_files(self, instruction_file_path: Path, sandbox: Any) -> str:
         """Copy instruction files into a sandbox session.
 
         Args:
             instruction_file_path: Path to the instruction file (e.g., CLAUDE.md)
-            sandbox_session_id: ID of the sandbox session
+            sandbox: The e2b sandbox instance
+
+        Returns:
+            Path to the instruction file inside the sandbox
 
         Raises:
             ExecutionError: If copy fails
@@ -329,15 +349,14 @@ class E2BExecutor(ExecutorBackend):
             if not instruction_file_path.exists():
                 raise ExecutionError(f"Instruction file not found: {instruction_file_path}")
 
-            # TODO: Implement actual e2b file upload
-            # This would involve using the e2b SDK to upload files to the sandbox
-            # For now, just validate the input
+            # Read file content and upload to sandbox
+            with open(instruction_file_path, "r") as f:
+                content = f.read()
 
-            # Example of what the actual implementation would do:
-            # e2b = self.pool._get_e2b_module()
-            # session = e2b.Sandbox(sandbox_id=sandbox_session_id)
-            # with open(instruction_file_path, "rb") as f:
-            #     session.upload_file(f, f"/workspace/{instruction_file_path.name}")
+            sandbox_path = f"/workspace/{instruction_file_path.name}"
+            sandbox.files.write(sandbox_path, content)
+
+            return sandbox_path
 
         except Exception as e:
             raise ExecutionError(f"Failed to copy instruction files: {str(e)}")
@@ -357,6 +376,8 @@ class E2BExecutor(ExecutorBackend):
             ExecutionContext with execution details
         """
         start_time = time.time()
+        sandbox = None
+        session_id = None
 
         # Get sandbox config from test suite metadata if available
         sandbox_config = SandboxConfig()
@@ -378,7 +399,7 @@ class E2BExecutor(ExecutorBackend):
                 template_id = self._build_or_get_template(template_name=template_name)
 
             # Step 2: Acquire sandbox session with the template
-            session_id = self.pool.acquire(sandbox_config)
+            session_id, sandbox = self.pool.acquire(sandbox_config, template_id)
 
             # Step 3: Inject environment variables (e.g., ANTHROPIC_API_KEY)
             env_vars_to_inject = dict(sandbox_config.environment_vars)
@@ -389,32 +410,61 @@ class E2BExecutor(ExecutorBackend):
                 env_vars_to_inject["ANTHROPIC_API_KEY"] = api_key
 
             if env_vars_to_inject:
-                self._inject_environment_vars(env_vars_to_inject, session_id)
+                self._inject_environment_vars(env_vars_to_inject, sandbox)
 
             # Step 4: Copy instruction files to sandbox
             instruction_file = test_suite.metadata.get(
                 "instruction_file", "/home/georgepearse/CLAUDE.md"
             )
-            if instruction_file:
-                self._copy_instruction_files(Path(instruction_file), session_id)
+            sandbox_instruction_path = None
+            if instruction_file and Path(instruction_file).exists():
+                sandbox_instruction_path = self._copy_instruction_files(
+                    Path(instruction_file), sandbox
+                )
 
-            # Step 5: Run agent invocation inside sandbox
-            # TODO: When e2b SDK is available, execute agent inside sandbox via:
-            # result = e2b_session.run_command("python -m retrocode.agent ...")
-            # For now, run locally
-            agent_response = self.agent.invoke(
+            # Step 5: Install retrocode in sandbox and run agent
+            # First, ensure retrocode is available in the sandbox
+            install_result = sandbox.commands.run(
+                "pip install retrocode anthropic --quiet",
+                timeout=120,
+            )
+
+            # Create a Python script to run the agent and capture output
+            agent_script = self._create_agent_script(
                 task=test_case.task,
-                instruction_file_path=instruction_file,
+                instruction_file=sandbox_instruction_path or instruction_file,
                 model=test_suite.model_under_test,
+            )
+
+            # Write the agent script to sandbox
+            sandbox.files.write("/workspace/run_agent.py", agent_script)
+
+            # Execute the agent script in sandbox
+            result = sandbox.commands.run(
+                "python /workspace/run_agent.py",
+                timeout=sandbox_config.timeout_seconds,
+            )
+
+            # Parse agent response from output
+            agent_response = self._parse_agent_output(
+                stdout=result.stdout,
+                stderr=result.stderr,
+                exit_code=result.exit_code,
+                test_case=test_case,
+                test_suite=test_suite,
             )
 
             execution_time_ms = (time.time() - start_time) * 1000
 
             # Step 6: Release sandbox session back to pool
-            self.pool.release(session_id)
+            if session_id:
+                self.pool.release(session_id)
 
             return ExecutionContext(
                 agent_response=agent_response,
+                stdout=result.stdout,
+                stderr=result.stderr,
+                exit_code=result.exit_code,
                 execution_time_ms=execution_time_ms,
                 execution_mode="e2b",
                 sandbox_info={
@@ -428,10 +478,144 @@ class E2BExecutor(ExecutorBackend):
         except Exception as e:
             execution_time_ms = (time.time() - start_time) * 1000
 
+            # Clean up sandbox on error
+            if session_id:
+                try:
+                    self.pool.release(session_id)
+                except Exception:
+                    pass
+
             return ExecutionContext(
                 agent_response=None,  # type: ignore
                 execution_time_ms=execution_time_ms,
                 execution_mode="e2b",
                 error_message=f"Sandbox execution failed: {str(e)}",
                 exit_code=1,
+            )
+
+    def _create_agent_script(
+        self,
+        task: str,
+        instruction_file: str,
+        model: str,
+    ) -> str:
+        """Create Python script to run agent in sandbox.
+
+        Args:
+            task: The task to execute
+            instruction_file: Path to instruction file
+            model: Model to use
+
+        Returns:
+            Python script as string
+        """
+        # Escape task for embedding in script
+        escaped_task = task.replace('"""', r"\"\"\"").replace("\\", "\\\\")
+
+        return f'''#!/usr/bin/env python3
+"""Agent execution script for sandbox."""
+
+import json
+import os
+import sys
+
+# Ensure ANTHROPIC_API_KEY is available
+api_key = os.getenv("ANTHROPIC_API_KEY")
+if not api_key:
+    print(json.dumps({{"error": "ANTHROPIC_API_KEY not set"}}))
+    sys.exit(1)
+
+from retrocode.agent import AgentInvoker
+
+try:
+    agent = AgentInvoker(api_key=api_key)
+    response = agent.invoke(
+        task="""{escaped_task}""",
+        instruction_file_path="{instruction_file}",
+        model="{model}",
+    )
+    
+    # Output response as JSON for parsing
+    output = {{
+        "full_response": response.full_response,
+        "generated_code": response.generated_code,
+        "generated_commands": response.generated_commands,
+        "tool_calls": response.tool_calls,
+        "conversation_trace": response.conversation_trace,
+        "task": response.task,
+        "model": response.model,
+        "instruction_file_path": response.instruction_file_path,
+    }}
+    print("---AGENT_OUTPUT_START---")
+    print(json.dumps(output))
+    print("---AGENT_OUTPUT_END---")
+except Exception as e:
+    print(json.dumps({{"error": str(e)}}))
+    sys.exit(1)
+'''
+
+    def _parse_agent_output(
+        self,
+        stdout: str,
+        stderr: str,
+        exit_code: int,
+        test_case: TestCase,
+        test_suite: TestSuite,
+    ) -> "AgentResponse":
+        """Parse agent output from sandbox execution.
+
+        Args:
+            stdout: Standard output from sandbox
+            stderr: Standard error from sandbox
+            exit_code: Exit code from sandbox
+            test_case: The test case being executed
+            test_suite: The test suite context
+
+        Returns:
+            AgentResponse parsed from output
+        """
+        from retrocode.models import AgentResponse
+
+        try:
+            # Extract JSON output between markers
+            start_marker = "---AGENT_OUTPUT_START---"
+            end_marker = "---AGENT_OUTPUT_END---"
+
+            if start_marker in stdout and end_marker in stdout:
+                start = stdout.index(start_marker) + len(start_marker)
+                end = stdout.index(end_marker)
+                json_str = stdout[start:end].strip()
+                data = json.loads(json_str)
+
+                if "error" in data:
+                    raise ExecutionError(data["error"])
+
+                return AgentResponse(
+                    task=data.get("task", test_case.task),
+                    full_response=data.get("full_response", ""),
+                    generated_code=data.get("generated_code", []),
+                    generated_commands=data.get("generated_commands", []),
+                    tool_calls=data.get("tool_calls", []),
+                    conversation_trace=data.get("conversation_trace", []),
+                    model=data.get("model", test_suite.model_under_test),
+                    instruction_file_path=data.get(
+                        "instruction_file_path",
+                        test_suite.metadata.get("instruction_file", ""),
+                    ),
+                )
+            else:
+                # Fallback: return raw output as response
+                return AgentResponse(
+                    task=test_case.task,
+                    full_response=stdout or stderr or "No output",
+                    model=test_suite.model_under_test,
+                    instruction_file_path=test_suite.metadata.get("instruction_file", ""),
+                )
+
+        except json.JSONDecodeError as e:
+            return AgentResponse(
+                task=test_case.task,
+                full_response=f"Failed to parse agent output: {e}\nStdout: {stdout}\nStderr: {stderr}",
+                model=test_suite.model_under_test,
+                instruction_file_path=test_suite.metadata.get("instruction_file", ""),
             )

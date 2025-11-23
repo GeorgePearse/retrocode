@@ -449,8 +449,23 @@ for assertion_result in result.assertion_results:
     print(f"Evidence: {assertion_result.evidence}")
 ```
 
+## Sandbox Execution
+
+For isolated, reproducible test execution, use E2B cloud sandboxes:
+
+```bash
+# Run tests in isolated sandbox
+retrocode run --tests tests/backtests/ --executor e2b
+
+# Use a template with CLI tools
+retrocode run --executor e2b --e2b-template claude-tools
+```
+
+See [Sandbox Execution](sandbox.md) for full documentation on E2B integration.
+
 ## Next Steps
 
+- [Sandbox Execution](sandbox.md) - Isolated cloud sandbox testing with E2B
 - [CI/CD Integration](ci-cd.md) - GitHub Actions setup
 - [Examples](../examples/basic-test.md) - Real-world test suites
 - [API Reference](../reference/api.md) - Complete API documentation

@@ -306,12 +306,19 @@ RUN cargo install ripgrep
 
     def test_inject_environment_vars_validates_input(self, executor):
         """Test that _inject_environment_vars validates input."""
+        from unittest.mock import MagicMock
+
+        # Create a mock sandbox object
+        mock_sandbox = MagicMock()
+        mock_sandbox.commands.run.return_value = None
+
         # Should not raise with valid dict
-        executor._inject_environment_vars({"KEY": "value"}, "session_123")
+        executor._inject_environment_vars({"KEY": "value"}, mock_sandbox)
+        mock_sandbox.commands.run.assert_called_once()
 
         # Should raise with non-dict
         with pytest.raises(ExecutionError, match="must be a dictionary"):
-            executor._inject_environment_vars("not a dict", "session_123")
+            executor._inject_environment_vars("not a dict", mock_sandbox)
 
     def test_copy_instruction_files_file_not_found(self, executor):
         """Test that _copy_instruction_files raises error for non-existent file."""
@@ -320,11 +327,19 @@ RUN cargo install ripgrep
 
     def test_copy_instruction_files_validates_path(self, executor, temp_env_dir):
         """Test that _copy_instruction_files validates file existence."""
+        from unittest.mock import MagicMock
+
         instruction_file = temp_env_dir / "CLAUDE.md"
         instruction_file.write_text("# Instructions")
 
+        # Create a mock sandbox object
+        mock_sandbox = MagicMock()
+        mock_sandbox.files.write.return_value = None
+
         # Should not raise with existing file
-        executor._copy_instruction_files(instruction_file, "session_123")
+        result = executor._copy_instruction_files(instruction_file, mock_sandbox)
+        mock_sandbox.files.write.assert_called_once()
+        assert result == f"/workspace/{instruction_file.name}"
 
 
 class TestE2BExecutorCaching:

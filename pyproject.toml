@@ -51,6 +51,10 @@ docs = [
     "mkdocstrings[python]>=0.20.0",
 ]
 
+e2b = [
+    "e2b-code-interpreter>=1.0.0",
+]
+
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["src", "tests"]

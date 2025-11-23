@@ -149,6 +149,36 @@ print(msg.content[0].text)
 
 ## Optional Dependencies
 
+### For E2B Sandbox Execution
+
+Run tests in isolated cloud sandboxes with [E2B](https://e2b.dev):
+
+```bash
+# With uv
+uv pip install 'retrocode[e2b]'
+
+# With pip
+pip install -e ".[e2b]"
+```
+
+You'll also need an E2B API key:
+
+1. Visit [e2b.dev](https://e2b.dev) and create an account
+2. Get your API key from the dashboard
+3. Set the environment variable:
+
+```bash
+export E2B_API_KEY="your-e2b-api-key"
+```
+
+Then run tests in the sandbox:
+
+```bash
+retrocode run --tests tests/backtests/ --executor e2b
+```
+
+See [Sandbox Execution](guides/sandbox.md) for full documentation.
+
 ### For Documentation
 
 To build the documentation locally:
@@ -193,7 +223,7 @@ Install everything:
 uv sync --all-extras
 
 # With pip
-pip install -e ".[dev,docs]"
+pip install -e ".[dev,docs,e2b]"
 ```
 
 ## Troubleshooting

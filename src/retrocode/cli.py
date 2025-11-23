@@ -8,6 +8,7 @@ from typing import Optional
 import click
 
 from retrocode.comparison import VersionComparator
+from retrocode.executors import E2BExecutor, LocalExecutor
 from retrocode.models import TestResult
 from retrocode.parser import YAMLTestParser
 from retrocode.reporting import HTMLReporter, MarkdownReporter
@@ -44,11 +45,25 @@ def cli() -> None:
     envvar="ANTHROPIC_API_KEY",
     help="Anthropic API key",
 )
+@click.option(
+    "--executor",
+    type=click.Choice(["local", "e2b"]),
+    default="local",
+    help="Execution backend: 'local' (default) or 'e2b' (isolated sandbox)",
+)
+@click.option(
+    "--e2b-template",
+    type=str,
+    default="base",
+    help="E2B template to use: 'base' or 'claude-tools' (only used with --executor e2b)",
+)
 def run(
     tests: str,
     output: str,
     html: Optional[str],
     api_key: Optional[str],
+    executor: str,
+    e2b_template: str,
 ) -> None:
     """Run all backtests."""
     click.echo(f"Running backtests from {tests}...")
@@ -64,8 +79,30 @@ def run(
         click.echo(f"Error parsing tests: {e}", err=True)
         sys.exit(1)
 
+    # Create executor based on choice
+    if executor == "e2b":
+        try:
+            from retrocode.executors.base import SandboxConfig
+
+            click.echo(f"Using E2B sandbox executor with template: {e2b_template}")
+            sandbox_config = SandboxConfig(template=e2b_template)
+            executor_instance = E2BExecutor(
+                api_key=api_key,
+                sandbox_config=sandbox_config,
+            )
+        except ImportError:
+            click.echo(
+                "E2B executor requires e2b-code-interpreter. "
+                "Install with: uv pip install 'retrocode[e2b]'",
+                err=True,
+            )
+            sys.exit(1)
+    else:
+        click.echo("Using local executor")
+        executor_instance = LocalExecutor(api_key=api_key)
+
     # Run tests
-    runner = TestRunner(api_key=api_key)
+    runner = TestRunner(api_key=api_key, executor=executor_instance)
     all_results = runner.run_suites(test_suites)
 
     # Flatten results
@@ -83,7 +120,7 @@ def run(
     # Save results based on extension
     if output.endswith(".json"):
         with open(output, "w", encoding="utf-8") as f:
-            json.dump([r.model_dump(mode='json') for r in flat_results], f, indent=2)
+            json.dump([r.model_dump(mode="json") for r in flat_results], f, indent=2)
         click.echo(f"JSON results saved to {output}")
     else:
         # Save markdown report

@@ -15,37 +15,29 @@ Traditional unit tests don't work for instruction files because outputs are non-
 ## Key Features
 
 - **Multiple Assertion Types** - From simple pattern checks to LLM-as-judge evaluations
-- **Regression Detection** - Compare against baseline to catch breaking changes
-- **Comprehensive Scoring** - Track behavioral improvements across versions
+- **Isolated Execution** - Run tests in secure E2B sandboxes
+- **Comprehensive Scoring** - Track behavioral improvements
 - **pytest Integration** - Run tests like any other test suite
-- **CI/CD Ready** - GitHub Actions workflow included
 - **Production Grade** - Fully typed Python, comprehensive error handling
 
 ## The Framework
 
-Built on proven patterns from DSPy, promptfoo, OpenAI Evals, and finance backtesting:
+Built on proven patterns from DSPy, promptfoo, and OpenAI Evals:
 
 ```
-Historical PRs (Test Cases)
+YAML Test Files
         ↓
-[New Configuration]
+Agent Invocation (Local / Sandbox)
         ↓
-Agent Invocation → Responses
+Responses
         ↓
 Multi-Type Assertions
   ├─ Deterministic (regex, string matching)
-  ├─ Code Analysis (AST, type hints, docstrings)
-  ├─ LLM-as-Judge (behavioral rules with caching)
+  ├─ Code Analysis (AST, type hints)
+  ├─ LLM-as-Judge (behavioral rules)
   └─ Snapshots (generated code comparison)
         ↓
-Multi-Tier Diff Scoring
-  ├─ Exact Match (100%)
-  ├─ Semantic Match (80%)
-  ├─ Functional Match (60%)
-  ├─ Partial Match (30%)
-  └─ No Match (0%)
-        ↓
-Results & Regression Reports
+Results & Reports
 ```
 
 ## Quick Start
@@ -90,21 +82,6 @@ retrocode run --tests tests/backtests --html report.html
 retrocode list-tests
 ```
 
-### 3. Detect Regressions
-
-```bash
-# Run baseline
-retrocode run --tests tests/backtests --output baseline.json
-
-# Make changes to your instructions...
-
-# Run candidate
-retrocode run --tests tests/backtests --output candidate.json
-
-# Compare
-retrocode compare --baseline baseline.json --candidate candidate.json
-```
-
 ## Core Concepts
 
 ### Assertion Types
@@ -116,30 +93,8 @@ Test different aspects of agent behavior:
 - **LLM Judge**: Behavioral rules ("Does this follow SOLID principles?")
 - **Snapshots**: Compare against known-good outputs
 
-### Multi-Tier Diff Scoring
-
-Evaluates generated code fairly:
-
-| Score | Meaning |
-|-------|---------|
-| 100% | Exact reproduction of expected change |
-| 80% | Same intent, different style |
-| 60% | Solves problem, different approach |
-| 30% | Shows understanding but incomplete |
-| 0% | Fundamentally wrong approach |
-
-### Finance Backtesting Analogy
-
-Think of it like backtesting trading strategies:
-
-| Finance | Code Generation |
-|---------|-----------------|
-| Strategy | Configuration (MCP, AGENTS.md, prompts) |
-| Historical trades | Historical PRs |
-| Performance metrics | Code quality (Pass@k, CodeBLEU) |
-| Curve fitting risk | Overfitting to specific PR types |
-
 ## What You'll Learn
+
 
 This documentation covers:
 
@@ -147,9 +102,8 @@ This documentation covers:
 - **Writing Tests** - YAML format, test structure, best practices
 - **Assertions** - All 7 types with real examples
 - **Advanced Features** - Custom validators, LLM judge tuning, caching
-- **CI/CD Integration** - GitHub Actions, PR validation, reports
 - **Python API** - Programmatic test execution
-- **Research & Design** - Naming decisions, architectural patterns, diff scoring
+- **Research & Design** - Naming decisions, architectural patterns
 
 ## Built With
 
@@ -168,8 +122,6 @@ Built on proven patterns from:
 - **DSPy** (Assertion framework, optimization)
 - **Evidently** (LLM evaluation in CI/CD)
 - **HumanEval** (Pass@k metrics)
-- **Finance backtesting** (Methodology, statistical rigor)
-- **SWE-bench/RepoBench** (Historical PR mining)
 
 ## Next Steps
 

@@ -7,7 +7,6 @@ from typing import Optional
 
 import click
 
-from retrocode.comparison import VersionComparator
 from retrocode.executors import E2BExecutor, LocalExecutor
 from retrocode.models import TestResult
 from retrocode.parser import YAMLTestParser
@@ -133,60 +132,6 @@ def run(
         click.echo(f"HTML report saved to {html}")
 
     sys.exit(0 if failed == 0 else 1)
-
-
-@cli.command()
-@click.option(
-    "--baseline",
-    type=click.Path(exists=True),
-    required=True,
-    help="Baseline results file (JSON)",
-)
-@click.option(
-    "--candidate",
-    type=click.Path(exists=True),
-    required=True,
-    help="Candidate results file (JSON)",
-)
-@click.option(
-    "--output",
-    type=click.Path(),
-    default="comparison_report.md",
-    help="Output file for comparison",
-)
-def compare(
-    baseline: str,
-    candidate: str,
-    output: str,
-) -> None:
-    """Compare two test runs."""
-    click.echo("Comparing baseline and candidate results...")
-
-    # Load results
-    try:
-        with open(baseline, encoding="utf-8") as f:
-            baseline_data = json.load(f)
-            baseline_results = [TestResult.model_validate(r) for r in baseline_data]
-        with open(candidate, encoding="utf-8") as f:
-            candidate_data = json.load(f)
-            candidate_results = [TestResult.model_validate(r) for r in candidate_data]
-    except Exception as e:
-        click.echo(f"Error loading results: {e}", err=True)
-        sys.exit(1)
-
-    # Compare
-    comparison = VersionComparator.compare(baseline_results, candidate_results)
-
-    # Generate report
-    report = VersionComparator.regression_report(comparison)
-    Path(output).write_text(report, encoding="utf-8")
-
-    click.echo(report)
-    click.echo(f"\nReport saved to {output}")
-
-    # Exit with error if regressions found
-    if VersionComparator.has_regressions(comparison):
-        sys.exit(1)
 
 
 @cli.command()

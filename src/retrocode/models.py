@@ -23,7 +23,6 @@ class AssertionType(str, Enum):
     LLM_JUDGE = "llm_judge"
     CODE_ANALYSIS = "code_analysis"
     SNAPSHOT = "snapshot"
-    PR_MATCH = "pr_match"
     CODE_CONTAINS = "code_contains"
     CODE_EXCLUDES = "code_excludes"
 
@@ -126,15 +125,3 @@ class TestResult(BaseModel):
             for r in self.assertion_results
             if not r.passed and r.assertion.severity == AssertionSeverity.WARNING
         ]
-
-
-@dataclass
-class ComparisonResult:
-    """Result of comparing two test runs."""
-
-    baseline_results: list[TestResult]
-    candidate_results: list[TestResult]
-    regressions: list[tuple[TestResult, TestResult]]  # (baseline, candidate)
-    improvements: list[tuple[TestResult, TestResult]]  # (baseline, candidate)
-    score_deltas: dict[str, float]  # Test name -> score change
-    timestamp: datetime = field(default_factory=_utc_now)

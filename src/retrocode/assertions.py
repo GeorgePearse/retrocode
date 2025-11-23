@@ -227,75 +227,6 @@ class JSONSchemaEvaluator(AssertionEvaluator):
             )
 
 
-class PRMatchEvaluator(AssertionEvaluator):
-    """Evaluates pr_match assertions (comparing against GitHub PR changes)."""
-
-    def evaluate(self, assertion: Assertion, response: AgentResponse) -> AssertionResult:
-        """Compare generated code against a GitHub PR.
-
-        Args:
-            assertion: The assertion with pr_reference in metadata
-            response: The agent response
-
-        Returns:
-            AssertionResult
-        """
-        pr_reference = assertion.metadata.get("pr_reference")
-        if not pr_reference:
-            return AssertionResult(
-                assertion=assertion,
-                passed=False,
-                message="No pr_reference specified in assertion metadata",
-            )
-
-        match_level = assertion.metadata.get("match_level", "semantic")
-        threshold = assertion.metadata.get("threshold", 0.75)
-
-        try:
-            from retrocode.pr_comparison import PRFetcher
-
-            # Fetch PR data
-            fetcher = PRFetcher()
-            pr_data = fetcher.fetch_pr(pr_reference)
-
-            # Get target content
-            target_content = self._get_check_content(assertion, response)
-
-            # Simple matching: check if any files from PR are mentioned in output
-            # TODO: Implement proper diff matching with configurable match_level
-            matched_files = sum(1 for file in pr_data.files if file.path in target_content)
-            score = matched_files / len(pr_data.files) if pr_data.files else 0.0
-
-            passed = score >= threshold
-
-            return AssertionResult(
-                assertion=assertion,
-                passed=passed,
-                message=f"PR match score: {score*100:.1f}% (threshold: {threshold*100:.0f}%)",
-                score=score,
-                evidence={
-                    "pr_reference": pr_reference,
-                    "matched_files": matched_files,
-                    "total_files": len(pr_data.files),
-                    "match_level": match_level,
-                },
-            )
-        except ValueError as e:
-            return AssertionResult(
-                assertion=assertion,
-                passed=False,
-                message=f"Failed to fetch PR: {e}",
-                evidence={"error": str(e)},
-            )
-        except Exception as e:
-            return AssertionResult(
-                assertion=assertion,
-                passed=False,
-                message=f"PR matching error: {e}",
-                evidence={"error": str(e)},
-            )
-
-
 class CodeContainsEvaluator(AssertionEvaluator):
     """Evaluates code_contains assertions (required code patterns)."""
 
@@ -415,7 +346,6 @@ class AssertionRegistry:
         AssertionType.MUST_NOT_CONTAIN: MustNotContainEvaluator,
         AssertionType.REGEX_MATCH: RegexMatchEvaluator,
         AssertionType.JSON_SCHEMA: JSONSchemaEvaluator,
-        AssertionType.PR_MATCH: PRMatchEvaluator,
         AssertionType.CODE_CONTAINS: CodeContainsEvaluator,
         AssertionType.CODE_EXCLUDES: CodeExcludesEvaluator,
     }

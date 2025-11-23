@@ -22,8 +22,6 @@ dependencies = [
     "jinja2>=3.1",
     "click>=8.0",
     "jsonschema>=4.0",
-    "pygithub>=2.0",
-    "diff-match-patch>=20200713",
 ]
 
 [project.optional-dependencies]

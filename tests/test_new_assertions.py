@@ -398,32 +398,6 @@ class TestAssertionRegistry:
         result = AssertionRegistry.evaluate(assertion, response)
         assert result.passed is True
 
-    def test_registry_evaluates_pr_match(self):
-        """Test registry can evaluate pr_match assertions (mock)."""
-        # Note: This test will fail without valid GitHub auth
-        # In real tests, we'd mock PRFetcher
-        assertion = Assertion(
-            type=AssertionType.PR_MATCH,
-            description="Match PR",
-            target=AssertionTarget.GENERATED_CODE,
-            metadata={
-                "pr_reference": "owner/repo#999",
-                "match_level": "exact",
-                "threshold": 0.5,
-            },
-        )
-        response = AgentResponse(
-            task="Test",
-            full_response="Test",
-            generated_code=["def foo(): pass"],
-            model="claude-3-5-sonnet",
-            instruction_file_path="CLAUDE.md",
-        )
-
-        # This will fail without actual GitHub access, which is expected
-        result = AssertionRegistry.evaluate(assertion, response)
-        assert result.passed is False  # Will fail due to invalid PR ref
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

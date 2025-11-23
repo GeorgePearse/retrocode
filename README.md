@@ -12,10 +12,9 @@ When you modify instruction files, you need confidence that:
 Traditional unit tests don't work for instruction files because outputs are non-deterministic. This framework instead provides:
 
 1. **Multiple assertion types** - From simple regex checks to LLM-as-judge evaluations
-2. **Regression detection** - Compare against baseline to catch breaking changes
-3. **Comprehensive scoring** - Track behavioral improvements across versions
-4. **pytest integration** - Run tests like any other test suite
-5. **CI/CD ready** - GitHub Actions workflow included
+2. **Comprehensive scoring** - Track behavioral improvements across versions
+3. **pytest integration** - Run tests like any other test suite
+4. **Isolated Sandboxes** - Run code in secure E2B sandboxes
 
 ## Architecture
 
@@ -30,7 +29,7 @@ Agent Invoker → Responses
     ↓
 Assertion Evaluators (Deterministic + LLM Judge)
     ↓
-Results + Comparisons
+Results
     ↓
 Reports (Markdown, HTML)
 ```
@@ -222,30 +221,6 @@ assertions:
     severity: warning  # Just a warning, test still passes
 ```
 
-## Version Comparison
-
-Compare instruction versions to detect regressions:
-
-```bash
-# Run tests against baseline
-retrocode run --tests tests/backtests/ --output baseline.json
-
-# Make changes to CLAUDE.md, then run again
-retrocode run --tests tests/backtests/ --output candidate.json
-
-# Compare versions
-retrocode compare --baseline baseline.json --candidate candidate.json
-```
-
-**Report shows:**
-- Regressions (tests that were passing now fail)
-- Improvements (tests that were failing now pass)
-- Score deltas (LLM judge score changes)
-- Human-readable diff of behavioral changes
-
-## CI/CD Integration
-
-Example GitHub Actions workflow in `.github/workflows/backtest.yml` (see below)
 
 ## Example Test Suites
 

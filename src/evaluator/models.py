@@ -25,6 +25,10 @@ class AssertionType(str, Enum):
     SNAPSHOT = "snapshot"
     CODE_CONTAINS = "code_contains"
     CODE_EXCLUDES = "code_excludes"
+    # Diff-specific assertion types
+    DIFF_JUDGE = "diff_judge"  # LLM evaluation of diff quality
+    DIFF_SYNTAX = "diff_syntax"  # Validates diff is syntactically correct
+    DIFF_APPLIES = "diff_applies"  # Validates diff can be cleanly applied
 
 
 class AssertionSeverity(str, Enum):
@@ -41,6 +45,7 @@ class AssertionTarget(str, Enum):
     GENERATED_CODE = "generated_code"
     FULL_RESPONSE = "full_response"
     TOOL_CALLS = "tool_calls"
+    GENERATED_DIFF = "generated_diff"  # Git diff output from model
 
 
 class Assertion(BaseModel):
@@ -95,6 +100,7 @@ class AgentResponse(BaseModel):
     tool_calls: list[dict[str, Any]] = Field(default_factory=list)
     generated_code: list[str] = Field(default_factory=list)
     generated_commands: list[str] = Field(default_factory=list)
+    generated_diff: Optional[str] = None  # Raw git diff output from model
     model: str
     timestamp: datetime = Field(default_factory=_utc_now)
     instruction_file_path: str

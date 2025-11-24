@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from sqlalchemy import create_engine
+from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
@@ -16,13 +16,13 @@ class CacheEntry(Base):
 
     __tablename__ = "judge_cache"
 
-    id = None  # Will be auto-generated
-    cache_key: str  # Hash of (model, response, judge_prompt)
-    judge_model: str
-    response_hash: str
-    result: str  # JSON string
-    created_at: datetime
-    expires_at: Optional[datetime]
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cache_key = Column(String(64), index=True, nullable=False)
+    judge_model = Column(String(100), nullable=False)
+    response_hash = Column(String(64), nullable=False)
+    result = Column(Text, nullable=False)  # JSON string
+    created_at = Column(DateTime, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
 
     def __init__(
         self,
@@ -112,11 +112,15 @@ class JudgeCache:
             if not entry:
                 return None
 
-            # Check if expired
-            if entry.expires_at and entry.expires_at < datetime.now(timezone.utc):
-                session.delete(entry)
-                session.commit()
-                return None
+            # Check if expired (handle timezone-naive datetimes from SQLite)
+            if entry.expires_at:
+                expires_at = entry.expires_at
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
+                if expires_at < datetime.now(timezone.utc):
+                    session.delete(entry)
+                    session.commit()
+                    return None
 
             try:
                 return json.loads(entry.result)

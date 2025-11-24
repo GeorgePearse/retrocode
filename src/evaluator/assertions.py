@@ -385,6 +385,25 @@ class AssertionRegistry:
             evaluator = SnapshotEvaluator()
             return evaluator.evaluate(assertion, response)
 
+        # Special handling for diff-based assertions (lazy import)
+        if assertion.type == AssertionType.DIFF_JUDGE:
+            from evaluator.diff_judge import DiffJudgeEvaluator
+
+            evaluator = DiffJudgeEvaluator()
+            return evaluator.evaluate(assertion, response)
+
+        if assertion.type == AssertionType.DIFF_SYNTAX:
+            from evaluator.diff_judge import DiffSyntaxEvaluator
+
+            evaluator = DiffSyntaxEvaluator()
+            return evaluator.evaluate(assertion, response)
+
+        if assertion.type == AssertionType.DIFF_APPLIES:
+            from evaluator.diff_judge import DiffAppliesEvaluator
+
+            evaluator = DiffAppliesEvaluator()
+            return evaluator.evaluate(assertion, response)
+
         evaluator_class = cls._evaluators.get(assertion.type)
         if not evaluator_class:
             msg = f"Unknown assertion type: {assertion.type}"

@@ -340,6 +340,41 @@ test_cases:
         pattern: "[pattern]"
 ```
 
+### Pattern 4: Diff Evaluation (SWE-bench Style)
+
+```yaml
+test_cases:
+  - description: "Bug fix generates correct patch"
+    task: |
+      Fix the bug in src/utils.py where process_data()
+      doesn't handle None values. Return a git diff.
+    assertions:
+      # Validate diff syntax
+      - type: diff_syntax
+        target: generated_diff
+        description: "Diff must be syntactically valid"
+        severity: error
+
+      # Validate diff applies to source
+      - type: diff_applies
+        target: generated_diff
+        description: "Diff must apply cleanly"
+        metadata:
+          file_contents:
+            "src/utils.py": |
+              def process_data(data):
+                  return data.strip()
+        severity: error
+
+      # LLM evaluation of diff quality
+      - type: diff_judge
+        target: generated_diff
+        description: "Diff correctly fixes the bug"
+        metadata:
+          threshold: 0.8
+        severity: error
+```
+
 ## Handling Multiple Requirements
 
 ### ❌ Wrong: One assertion for multiple requirements

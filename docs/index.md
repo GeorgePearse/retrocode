@@ -14,7 +14,8 @@ Traditional unit tests don't work for instruction files because outputs are non-
 
 ## Key Features
 
-- **Multiple Assertion Types** - From simple pattern checks to LLM-as-judge evaluations
+- **13 Assertion Types** - From simple pattern checks to LLM-as-judge evaluations
+- **Diff Evaluation** - Validate git diffs with syntax checks, applicability, and LLM quality scoring
 - **Isolated Execution** - Run tests in secure E2B sandboxes
 - **Comprehensive Scoring** - Track behavioral improvements
 - **pytest Integration** - Run tests like any other test suite
@@ -35,6 +36,7 @@ Multi-Type Assertions
   ├─ Deterministic (regex, string matching)
   ├─ Code Analysis (AST, type hints)
   ├─ LLM-as-Judge (behavioral rules)
+  ├─ Diff Evaluation (syntax, applicability, quality)
   └─ Snapshots (generated code comparison)
         ↓
 Results & Reports
@@ -91,6 +93,7 @@ Test different aspects of agent behavior:
 - **Deterministic**: Pattern matching, string containment
 - **Code Analysis**: Type hints, docstrings, complexity
 - **LLM Judge**: Behavioral rules ("Does this follow SOLID principles?")
+- **Diff Evaluation**: Validate git diffs for syntax, applicability, and quality
 - **Snapshots**: Compare against known-good outputs
 
 ## What You'll Learn
@@ -100,7 +103,8 @@ This documentation covers:
 
 - **Getting Started** - Installation and first test
 - **Writing Tests** - YAML format, test structure, best practices
-- **Assertions** - All 7 types with real examples
+- **Assertions** - All 13 types with real examples
+- **Diff Evaluation** - SWE-bench style testing with git diffs
 - **Advanced Features** - Custom validators, LLM judge tuning, caching
 - **Python API** - Programmatic test execution
 - **Research & Design** - Naming decisions, architectural patterns

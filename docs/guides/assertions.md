@@ -1,6 +1,6 @@
 # Assertion Types Reference
 
-Complete reference for all 10 assertion types supported by evaluator.
+Complete reference for all 13 assertion types supported by evaluator.
 
 ## Overview
 
@@ -18,6 +18,9 @@ Assertions validate different aspects of agent responses:
 | `pr_match` | PR comparison | Match against GitHub PR changes |
 | `code_contains` | Required code patterns | Ensure specific code is present |
 | `code_excludes` | Forbidden code patterns | Prevent dangerous/unwanted code |
+| `diff_judge` | LLM diff evaluation | Evaluate quality of git diffs |
+| `diff_syntax` | Diff syntax validation | Verify diff is syntactically correct |
+| `diff_applies` | Diff applicability | Verify diff can be applied to source |
 
 ## 1. must_contain
 
@@ -594,6 +597,274 @@ assertions:
     description: "Code quality checks"
 ```
 
+## 11. diff_judge
+
+Use Claude to evaluate the quality of git diffs. Ideal for SWE-bench style evaluations where agents generate code changes.
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: diff_judge
+    target: generated_diff
+    description: "Diff correctly solves the bug"
+    metadata:
+      threshold: 0.7
+    severity: error
+```
+
+### How It Works
+
+The evaluator:
+1. Extracts the git diff from the agent's response
+2. Validates the diff is syntactically correct
+3. Sends the diff to Claude with evaluation criteria
+4. Scores on 5 dimensions: correctness, completeness, code quality, minimal changes, no regressions
+
+### Custom Judge Prompt
+
+```yaml
+assertions:
+  - type: diff_judge
+    target: generated_diff
+    description: "Diff adds proper error handling"
+    metadata:
+      judge_prompt: |
+        Evaluate if this diff adds proper error handling:
+
+        Task: {task}
+
+        Diff:
+        ```diff
+        {diff}
+        ```
+
+        Consider:
+        - Are exceptions caught appropriately?
+        - Are error messages informative?
+        - Is the error handling complete?
+
+        Respond as JSON: {"score": 0-1, "passed": true/false, "summary": "..."}
+      threshold: 0.8
+    severity: error
+```
+
+### Default Evaluation Criteria
+
+When no custom prompt is provided, diffs are evaluated on:
+
+| Criterion | Description |
+|-----------|-------------|
+| **Correctness** | Does the diff correctly solve the stated problem? |
+| **Completeness** | Does it address all requirements of the task? |
+| **Code Quality** | Is the code well-written, readable, and maintainable? |
+| **Minimal Changes** | Does it make only necessary modifications? |
+| **No Regressions** | Does it avoid introducing bugs or breaking existing functionality? |
+
+### Result Evidence
+
+The assertion result includes detailed statistics:
+
+```yaml
+evidence:
+  score: 0.85
+  correctness:
+    score: 0.9
+    reasoning: "Correctly fixes the null pointer issue"
+  completeness:
+    score: 0.8
+    reasoning: "Addresses main issue but could add tests"
+  diff_stats:
+    files_changed: 2
+    additions: 15
+    deletions: 3
+    files_added: 0
+    files_deleted: 0
+```
+
+### Use Cases
+
+- **SWE-bench evaluations**: Test if agents can fix real bugs
+- **Code review automation**: Evaluate quality of generated patches
+- **Instruction tuning**: Measure diff quality improvements
+
+## 12. diff_syntax
+
+Validate that a generated diff is syntactically correct (proper unified diff format).
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: diff_syntax
+    target: generated_diff
+    description: "Generated diff must be valid"
+    severity: error
+```
+
+### What It Validates
+
+- Proper `diff --git` header format
+- Valid `---` and `+++` file paths
+- Correct `@@ ... @@` hunk headers
+- Consistent line counts in hunks
+- Proper line prefixes (`+`, `-`, ` `)
+
+### Automatic Diff Extraction
+
+The evaluator automatically extracts diffs from:
+
+1. **Explicit `generated_diff` field** on the response
+2. **Markdown code blocks** in the response:
+   ```markdown
+   Here's the fix:
+
+   ```diff
+   diff --git a/file.py b/file.py
+   ...
+   ```
+   ```
+3. **Raw diff format** starting with `diff --git`
+
+### Result Details
+
+```yaml
+# Passing result
+passed: true
+message: "Diff is syntactically valid (2 files)"
+evidence:
+  files_changed: 2
+  warnings: []
+
+# Failing result
+passed: false
+message: "Diff syntax errors: Hunk line count mismatch at line 15"
+evidence:
+  errors: ["Hunk line count mismatch at line 15"]
+  warnings: ["File path uses backslashes"]
+```
+
+### Use Cases
+
+- **Pre-validation**: Check diff before expensive LLM judge evaluation
+- **Format enforcement**: Ensure agents produce properly formatted diffs
+- **Pipeline validation**: Gate downstream processing on valid diffs
+
+## 13. diff_applies
+
+Validate that a generated diff can be cleanly applied to the original source files.
+
+### Basic Example
+
+```yaml
+assertions:
+  - type: diff_applies
+    target: generated_diff
+    description: "Diff must apply cleanly"
+    metadata:
+      file_contents:
+        "src/auth.py": |
+          def authenticate(user, password):
+              if not user:
+                  return False
+              return verify(user, password)
+    severity: error
+```
+
+### How It Works
+
+The evaluator:
+1. Parses the diff to identify affected files
+2. Checks each hunk's context lines match the original file
+3. Verifies line numbers are correct
+4. Reports any mismatches or conflicts
+
+### Multiple Files
+
+```yaml
+assertions:
+  - type: diff_applies
+    target: generated_diff
+    metadata:
+      file_contents:
+        "src/auth.py": |
+          def authenticate(user, password):
+              return verify(user, password)
+        "src/utils.py": |
+          def verify(user, password):
+              return check_credentials(user, password)
+        "tests/test_auth.py": |
+          def test_auth():
+              assert authenticate("admin", "secret")
+    severity: error
+```
+
+### Validation Checks
+
+| Check | Description |
+|-------|-------------|
+| **File exists** | Modified files must be in `file_contents` |
+| **New file unique** | New files must not already exist |
+| **Context matches** | Context lines must match original content |
+| **Line numbers valid** | Hunk offsets must be within file bounds |
+
+### Error Messages
+
+```yaml
+# Missing file
+passed: false
+message: "Diff cannot be applied: Cannot modify src/auth.py: file not found"
+
+# Context mismatch
+passed: false
+message: |
+  Diff cannot be applied: src/auth.py line 5: context mismatch
+    Expected: '    return verify(user, password)'
+    Actual:   '    return check(user, password)'
+
+# New file exists
+passed: false
+message: "Diff cannot be applied: Cannot create src/new.py: file already exists"
+```
+
+### Use Cases
+
+- **Realistic evaluation**: Verify diffs work against actual code
+- **Integration testing**: Ensure agent understands codebase context
+- **SWE-bench style**: Validate patches before applying to repos
+
+### Combining Diff Assertions
+
+For comprehensive diff evaluation, combine all three:
+
+```yaml
+assertions:
+  # First: Check syntax is valid
+  - type: diff_syntax
+    target: generated_diff
+    description: "Diff must be syntactically valid"
+    severity: error
+
+  # Second: Check it applies to source
+  - type: diff_applies
+    target: generated_diff
+    description: "Diff must apply to source files"
+    metadata:
+      file_contents:
+        "src/buggy.py": |
+          def process(data):
+              return data.strip()  # Bug: doesn't handle None
+    severity: error
+
+  # Third: Evaluate quality with LLM
+  - type: diff_judge
+    target: generated_diff
+    description: "Diff correctly fixes the bug"
+    metadata:
+      threshold: 0.8
+    severity: error
+```
+
 ## Assertion Targets
 
 Available for: `must_contain`, `must_not_contain`, `regex_match`, `code_analysis`, `code_contains`, `code_excludes`
@@ -603,6 +874,7 @@ Available for: `must_contain`, `must_not_contain`, `regex_match`, `code_analysis
 | `full_response` | Complete agent response |
 | `generated_code` | Python/code blocks from response |
 | `generated_commands` | Shell commands from response |
+| `generated_diff` | Git diff output from response |
 | `tool_calls` | API calls the agent made |
 
 Example:

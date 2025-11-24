@@ -55,6 +55,7 @@ nav:
   - User Guide:
     - Writing Tests: guides/writing-tests.md
     - Assertion Types: guides/assertions.md
+    - Diff Evaluation: guides/diff-evaluation.md
     - Sandbox Execution: guides/sandbox.md
     - Advanced Features: guides/advanced.md
   - Architecture: architecture.md
